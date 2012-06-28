@@ -17,9 +17,8 @@
 Projectile::Projectile() {};
 
 //Regular constructor
-Projectile::Projectile(int xin, int yin, Fleet* dest, std::string effect, float speed):
-  x_(xin),
-  y_(yin),
+Projectile::Projectile(Vec2f start, Fleet* dest, std::string effect, float speed):
+  pos_(start),
   dest_(dest),
   speed_(DEFAULT_PROJECTILE_SPEED*speed),
   effect_(effect),
@@ -42,6 +41,19 @@ void Projectile::update()
 
   //Move projectile towards destination
   //Find target coordinates
+  Vec2f tar = dest_->pos();
+
+  //Find the vector to apply
+  Vec2f diff = tar-pos_;
+  diff.normalize();
+  diff *= speed_*(dt/1000.0);
+
+  //Move it
+  pos_ += diff;
+
+  /*
+  //Move projectile towards destination
+  //Find target coordinates
   float tarx = dest_->x();
   float tary = dest_->y();
 
@@ -51,13 +63,14 @@ void Projectile::update()
   //Change location based on that
   x_ += (tarx-startx_) * dist;
   y_ += (tary-starty_) * dist;
+  */
 }
 
 //Displays the projectile
 void Projectile::display(SDL_Surface* screen, const SDL_Rect& camera)
 {
   //For now, just draw a rectangle
-  SDL_Rect rect = {Sint16(x_ - 5 - camera.x), Sint16(y_ - 5 - camera.y), 10, 10};
+  SDL_Rect rect = {Sint16(pos_.x() - 5 - camera.x), Sint16(pos_.y() - 5 - camera.y), 10, 10};
   SDL_FillRect(screen, &rect, SDL_MapRGB(screen->format, 0, 0, 0));
 }
 

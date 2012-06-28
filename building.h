@@ -9,6 +9,7 @@
 
 #include "SDL/SDL.h"
 #include "rotationcache.h"
+#include "vec2f.h"
 #include <string>
 
 #ifndef _building_h_
@@ -25,17 +26,13 @@ class Building
   Building(SDL_Surface* surf, SDL_Surface* consSurf, std::string effect);
 
   //Regular use functions
-  void display(int x, int y, float angle, SDL_Surface* screen, bool complete);
+  void display(Vec2f pos, float angle, SDL_Surface* screen, bool complete);
 
   //Accessors
   SDL_Surface* rotation(float angle = -1, bool complete = true);
-  std::string effect() {return effect_;}
   const std::string effect() const {return effect_;}
-  int buildtime() {return buildtime_;}
   int buildtime() const {return buildtime_;}
-  int cd() {return cd_;}
   int cd() const {return cd_;}
-  int range() {return range_;}
   int range() const {return range_;}
 
   //Mutators

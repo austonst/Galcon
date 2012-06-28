@@ -11,6 +11,7 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
 #include "buildingInstance.h"
+#include "vec2f.h"
 #include <vector>
 #include <map>
 #include <list>
@@ -26,7 +27,7 @@ class Planet
  public:
   //Constructors
   Planet();
-  Planet(SDL_Surface* surf, float size, int x, int y, int type);
+  Planet(SDL_Surface* surf, float size, Vec2f loc, int type);
 
   //Regular use functions
   void display(SDL_Surface* screen, TTF_Font* font, const SDL_Rect& camera);
@@ -41,19 +42,16 @@ class Planet
 
   //Accessors
   SDL_Surface* rotation(float angle = -1);
-  float x() {return x_;}
-  float y() {return y_;}
-  float x() const {return x_;}
-  float y() const {return y_;}
-  float size() {return size_;}
+  Vec2f pos() const {return pos_;}
+  double x() const {return pos_.x();}
+  double y() const {return pos_.y();}
   float size() const {return size_;}
-  char type() {return type_;}
   char type() const {return type_;}
   float shipcount(int index) {return ship_[index].first;}
   std::vector<int> shipcount();
   unsigned int buildcount() const {return building_.size();}
   BuildingInstance* building(int i) {return &(building_[i]);}
-  SDL_Rect buildcoords(int i);
+  Vec2f buildcoords(int i);
   int owner() {return owner_;}
   int owner() const {return owner_;}
   int buildIndex() const {return buildIndex_;}
@@ -77,8 +75,8 @@ class Planet
   //Rotation speed of the planet, in rad/s
   float rotspeed_;
 
-  //X and Y coordinates of the planet
-  float x_, y_;
+  //Location of the planet
+  Vec2f pos_;
 
   //Size of the planet as a scalar amount from the base
   float size_;

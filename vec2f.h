@@ -50,7 +50,7 @@ class Vec2f
   double length() const {return sqrt(data[0]*data[0]+data[1]*data[1]);}
   void normalize() {
     double d = length();
-    if (length > 0) scale(1/length); }
+    if (d > 0) scale(1/d); }
   void scale(double d) {scale(d,d,d);}
   void scale(double d0, double d1, double d2) {
     data[0] *= d0;
@@ -78,13 +78,11 @@ class Vec2f
     data[1] /= d;
     return *this; }
   friend Vec2f operator+(const Vec2f &v1, const Vec2f &v2) {
-    Vec2f v3 = v1; v1 += v2; return v3; }
+    Vec2f v3 = v1; v3 += v2; return v3; }
   friend Vec2f operator-(const Vec2f &v1, const Vec2f &v2) {
-    Vec2f v3 = v1; v1 -= v2; return v3; }
+    Vec2f v3 = v1; v3 -= v2; return v3; }
   friend Vec2f operator-(const Vec2f &V) {
     Vec2f v2 = V; v2.negate(); return v2; }
-  friend Vec2f operator*(const Vec2f &v1, const Vec2f &v2) {
-    Vec2f v3 = v1; v1 *= v2; return v3; }
   friend Vec2f operator*(const Vec2f &v1, double d) {
     Vec2f v2 = v1; v2.scale(d); return v2; }
   friend Vec2f operator*(double d, const Vec2f &v1) {

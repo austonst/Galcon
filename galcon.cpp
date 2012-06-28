@@ -2,7 +2,7 @@
   -----Galcon Game Main Body-----
   Auston Serling
   austonst@gmail.com
-  12/20/11
+  6/28/12
 
   Contains the main body for the game "Galcon" (Unnamed so far).
 */
@@ -10,6 +10,7 @@
 #include "planet.h"
 #include "fleet.h"
 #include "projectile.h"
+#include "vec2f.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
 #include "SDL/SDL_ttf.h"
@@ -137,9 +138,9 @@ int main(int argc, char* argv[])
 
   //Add a few planets
   SDL_Surface* planetimg = loadImage("planet.png");
-  planets.push_back(Planet(planetimg, 1.2, 200, 200, 1));
-  planets.push_back(Planet(planetimg, 0.6, 750, 550, 0));
-  planets.push_back(Planet(planetimg, 1.0, 1000, 900, 0));
+  planets.push_back(Planet(planetimg, 1.2, Vec2f(200, 200), 1));
+  planets.push_back(Planet(planetimg, 0.6, Vec2f(750, 550), 0));
+  planets.push_back(Planet(planetimg, 1.0, Vec2f(1000, 900), 0));
   SDL_FreeSurface(planetimg);
 
   //The array of indicators
@@ -281,14 +282,15 @@ int main(int argc, char* argv[])
 		  selectPlanet = planNull;
 
 		  //Adjust mouse coordinates based on camera
-		  event.button.x += camera.x;
-		  event.button.y += camera.y;
+		  Vec2f click(event.button.x + camera.x, event.button.y + camera.y);
 		  
 		  for (planetIter i = planets.begin(); i != planets.end(); i++)
 		    {
 		      //See if distance from center is less than planet radius
-		      if (std::sqrt(((event.button.x - (*i).x() - (UNSCALED_PLANET_RADIUS * (*i).size())) * (event.button.x - (*i).x() - (UNSCALED_PLANET_RADIUS * (*i).size()))) +
-				    ((event.button.y - (*i).y() - (UNSCALED_PLANET_RADIUS * (*i).size())) * (event.button.y - (*i).y() - (UNSCALED_PLANET_RADIUS * (*i).size())))) < UNSCALED_PLANET_RADIUS * (*i).size())
+		      Vec2f center(i->x() + (UNSCALED_PLANET_RADIUS * i->size()),
+				   i->y() + (UNSCALED_PLANET_RADIUS * i->size()));
+
+		      if ((click-center).length() < UNSCALED_PLANET_RADIUS * i->size())
 			{
 			  //Ensure the planet belongs to this person
 			  if ((*i).owner() == localPlayer)
@@ -309,15 +311,16 @@ int main(int argc, char* argv[])
 		    {
 
 		      //Adjust mouse coordinates based on camera
-		      event.button.x += camera.x;
-		      event.button.y += camera.y;
+		      Vec2f click(event.button.x + camera.x, event.button.y + camera.y);
 		      
 		      //Check to see if any are being clicked on
 		      for (planetIter i = planets.begin(); i != planets.end(); i++)
 			{
+			  Vec2f center(i->x() + (UNSCALED_PLANET_RADIUS * i->size()),
+				       i->y() + (UNSCALED_PLANET_RADIUS * i->size()));
+			  
 			  //See if distance from center is less than planet radius
-			  if (std::sqrt(((event.button.x - (*i).x() - (UNSCALED_PLANET_RADIUS * (*i).size())) * (event.button.x - (*i).x() - (UNSCALED_PLANET_RADIUS * (*i).size()))) +
-					((event.button.y - (*i).y() - (UNSCALED_PLANET_RADIUS * (*i).size())) * (event.button.y - (*i).y() - (UNSCALED_PLANET_RADIUS * (*i).size())))) < UNSCALED_PLANET_RADIUS * (*i).size())
+			  if ((click-center).length() < UNSCALED_PLANET_RADIUS * i->size())
 			    {
 			      //Split ships from the source planet
 			      std::vector<int> transfer = (*selectPlanet).splitShips(0.5);
@@ -348,11 +351,10 @@ int main(int argc, char* argv[])
 	  (*i).update();
 
 	  //See if distance from center is less than planet radius
-	  float tarx = (*i).dest()->x() + (UNSCALED_PLANET_RADIUS*(*i).dest()->size());
-	  float tary = (*i).dest()->y() + (UNSCALED_PLANET_RADIUS*(*i).dest()->size());
+	  Vec2f tar((*i).dest()->x() + (UNSCALED_PLANET_RADIUS*(*i).dest()->size()),
+		    (*i).dest()->y() + (UNSCALED_PLANET_RADIUS*(*i).dest()->size()));
 	  
-	  if (std::sqrt((((*i).x() - tarx) * ((*i).x() - tarx)) +
-			(((*i).y() - tary) * ((*i).y() - tary))) < UNSCALED_PLANET_RADIUS * (*((*i).dest())).size())
+	  if ((tar-i->pos()).length() < UNSCALED_PLANET_RADIUS * (i->dest())->size())
 	    {
 	      //Check if friendly or hostile
 	      if ((*i).dest()->owner() == (*i).owner())
@@ -418,12 +420,11 @@ int main(int argc, char* argv[])
 		  //Loop over all potential target fleets, find closest
 		  Fleet* closest = NULL;
 		  float closestDist = -1;
-		  SDL_Rect rect = i->buildcoords(j);
+		  Vec2f coords = i->buildcoords(j);
 		  for (fleetIter k = fleets.begin(); k != fleets.end(); k++)
 		    {
 		      //Compute the distance between them
-		      float dist = std::sqrt((rect.x - k->x())*(rect.x - k->x()) +
-					     (rect.y - k->y())*(rect.y - k->y()));
+		      double dist = (coords-k->pos()).length();
 		      
 		      //Continue if the fleet is out of range
 		      if (dist > b->range()) continue;
@@ -441,7 +442,7 @@ int main(int argc, char* argv[])
 		    {
 		      if (b->fire())
 			{
-			  projectiles.push_back(Projectile(rect.x, rect.y, closest, b->effect(), std::atof(tokens[tokens.size()-1].c_str())));
+			  projectiles.push_back(Projectile(coords, closest, b->effect(), std::atof(tokens[tokens.size()-1].c_str())));
 			}
 		    }
 		}

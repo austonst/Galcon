@@ -12,6 +12,7 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
 #include "rotationcache.h"
+#include "vec2f.h"
 #include <cmath>
 #include <string>
 #include <sstream>
@@ -27,8 +28,7 @@ Planet::Planet()
   rotation_ = RotationCache();
   rot_ = 0;
   rotspeed_ = 0;
-  x_ = 0;
-  y_ = 0;
+  pos_ = Vec2f(0,0);
   size_ = 1.0;
   time_ = 0;
   type_ = 0;
@@ -40,12 +40,11 @@ Planet::Planet()
 }
 
 //Regular constructor
-Planet::Planet(SDL_Surface* surf, float size, int x, int y, int type):
+Planet::Planet(SDL_Surface* surf, float size, Vec2f loc, int type):
 	    rotation_(scaleNN(surf, size), NUM_PLANET_ROTATIONS),
 	    rot_(0),
 	    rotspeed_(0),
-	    x_(x),
-	    y_(y),
+	    pos_(loc),
 	    size_(size),
 	    time_(0),
 	    type_(type),
@@ -80,15 +79,15 @@ void Planet::display(SDL_Surface* screen, TTF_Font* font, const SDL_Rect& camera
 	  float rad = (UNSCALED_PLANET_RADIUS * size_) + building_[i].rotation(0)->h/5;
 
 	  //Calculate coordinates
-	  outrect.x = (std::cos(angle) * rad) + x_ + (rotation_.rotation(0)->w/2) - building_[i].rotation(0)->w/2;
-	  outrect.y = (std::sin(angle) * rad) + y_ + (rotation_.rotation(0)->h/2) - building_[i].rotation(0)->h/2;
+	  outrect.x = (std::cos(angle) * rad) + pos_.x() + (rotation_.rotation(0)->w/2) - building_[i].rotation(0)->w/2;
+	  outrect.y = (std::sin(angle) * rad) + pos_.y() + (rotation_.rotation(0)->h/2) - building_[i].rotation(0)->h/2;
 
 	  //Change by camera
 	  outrect.x -= camera.x;
 	  outrect.y -= camera.y;
 	  
 	  //Display
-	  building_[i].display(outrect.x, outrect.y, angle + 3.14159265358979323/2, screen, (buildIndex_==Sint32(i))?false:true);
+	  building_[i].display(Vec2f(outrect.x, outrect.y), angle + 3.14159265358979323/2, screen, (buildIndex_==Sint32(i))?false:true);
 	}
 
       //Add to attachAngle
@@ -96,15 +95,15 @@ void Planet::display(SDL_Surface* screen, TTF_Font* font, const SDL_Rect& camera
     }
 
   //Draw planet
-  outrect.x = x_ - camera.x;
-  outrect.y = y_ - camera.y;
+  outrect.x = pos_.x() - camera.x;
+  outrect.y = pos_.y() - camera.y;
   SDL_BlitSurface(rotation_.rotation(rot_), NULL, screen, &outrect);
 
   //Draw indicator
   if (owner_ != 0)
     {
-      outrect.x = x_ - (12 * size_) - camera.x;
-      outrect.y = y_ - (12 * size_) - camera.y;
+      outrect.x = pos_.x() - (12 * size_) - camera.x;
+      outrect.y = pos_.y() - (12 * size_) - camera.y;
       SDL_BlitSurface(indicator_, NULL, screen, &outrect);
     }
 
@@ -157,8 +156,8 @@ void Planet::display(SDL_Surface* screen, TTF_Font* font, const SDL_Rect& camera
     }
 
   //Draw ship count
-  outrect.x = x_ + (UNSCALED_PLANET_RADIUS * size_) - (countImg_->w/2) - camera.x;
-  outrect.y = y_ + (UNSCALED_PLANET_RADIUS * size_) - (countImg_->h/2) - camera.y;
+  outrect.x = pos_.x() + (UNSCALED_PLANET_RADIUS * size_) - (countImg_->w/2) - camera.x;
+  outrect.y = pos_.y() + (UNSCALED_PLANET_RADIUS * size_) - (countImg_->h/2) - camera.y;
   SDL_BlitSurface(countImg_, NULL, screen, &outrect);
 }
 
@@ -497,7 +496,7 @@ std::vector<int> Planet::shipcount()
 }
 
 //Returns the coordinates of the base of a building
-SDL_Rect Planet::buildcoords(int i)
+Vec2f Planet::buildcoords(int i)
 {
   //Get the building
   BuildingInstance b = building_[i];
@@ -505,11 +504,9 @@ SDL_Rect Planet::buildcoords(int i)
   //Construct the coordinates
   float angle = i*rot_;
   float rad = (UNSCALED_PLANET_RADIUS * size_) + b.rotation(0)->h/5;
-  SDL_Rect outrect;
-  outrect.x = (std::cos(angle) * rad) + x_ + (rotation_.rotation(0)->w/2);
-  outrect.y = (std::sin(angle) * rad) + y_ + (rotation_.rotation(0)->h/2);
 
-  return outrect;
+  return Vec2f((std::cos(angle) * rad) + pos_.x() + (rotation_.rotation(0)->w/2),
+	       (std::sin(angle) * rad) + pos_.y() + (rotation_.rotation(0)->h/2));
 }
 
 //Sets the owner and adjusts the indicator

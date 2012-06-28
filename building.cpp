@@ -31,12 +31,12 @@ Building::Building(SDL_Surface* surf, SDL_Surface* consSurf, std::string effect)
 }
 
 //Displays the building to the given coordinates
-void Building::display(int x, int y, float angle, SDL_Surface* screen, bool complete)
+void Building::display(Vec2f pos, float angle, SDL_Surface* screen, bool complete)
 {
   //Blit it
   SDL_Rect outrect;
-  outrect.x = x;
-  outrect.y = y;
+  outrect.x = pos.x();
+  outrect.y = pos.y();
   if (complete)
     {
       SDL_BlitSurface(image_.rotation(angle), NULL, screen, &outrect);

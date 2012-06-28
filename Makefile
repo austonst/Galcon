@@ -8,16 +8,16 @@ all: galcon
 galcon: building.o fleet.o planet.o rotationcache.o scale.o galcon.o projectile.o buildingInstance.o
 	$(CC) building.o fleet.o planet.o rotationcache.o scale.o galcon.o projectile.o buildingInstance.o $(LDFLAGS) $(OUTPUT)
 
-galcon.o: galcon.cpp planet.o fleet.o
+galcon.o: galcon.cpp planet.o fleet.o vec2f.h
 	$(CC) galcon.cpp $(CFLAGS)
 
-building.o: building.cpp building.h rotationcache.o
+building.o: building.cpp building.h rotationcache.o vec2f.h
 	$(CC) building.cpp $(CFLAGS)
 
-fleet.o: fleet.cpp fleet.h planet.o
+fleet.o: fleet.cpp fleet.h planet.o vec2f.h
 	$(CC) fleet.cpp $(CFLAGS)
 
-planet.o: planet.cpp planet.h scale.o rotationcache.o buildingInstance.o
+planet.o: planet.cpp planet.h scale.o rotationcache.o buildingInstance.o vec2f.h
 	$(CC) planet.cpp $(CFLAGS)
 
 rotationcache.o: rotationcache.cpp rotationcache.h
@@ -26,8 +26,8 @@ rotationcache.o: rotationcache.cpp rotationcache.h
 scale.o: scale.cpp scale.h
 	$(CC) scale.cpp $(CFLAGS)
 
-projectile.o: projectile.cpp projectile.h
+projectile.o: projectile.cpp projectile.h vec2f.h
 	$(CC) projectile.cpp $(CFLAGS)
 
-buildingInstance.o: buildingInstance.cpp buildingInstance.h building.o
+buildingInstance.o: buildingInstance.cpp buildingInstance.h building.o vec2f.h
 	$(CC) buildingInstance.cpp $(CFLAGS)

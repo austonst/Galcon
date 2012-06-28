@@ -1,16 +1,21 @@
 /*
   -----Fleet Class Declaration-----
   Auston Sterling
-  4/4/12
+  6/28/12
   austonst@gmail.com
 
   Contains the declaration for the Fleet class.
+
+  As a note: For a small increase in memory cost, we could lose the dependency on
+  planet.h and just store the planet's size. Could help if circular dependencies
+  need resolving.
 */
 
 #ifndef _fleet_h_
 #define _fleet_h_
 
 #include <vector>
+#include "vec2f.h"
 #include "planet.h"
 
 const int DEFAULT_FLEET_SPEED = 100;
@@ -23,14 +28,11 @@ class Fleet
   Fleet(const std::vector<int>& inships, Planet* begin, Planet* end);
 
   //Accessors
-  float x() {return x_;}
-  float x() const {return x_;}
-  float y() {return y_;}
-  float y() const {return y_;}
-  std::vector<int> ships() {return ships_;}
+  Vec2f pos() const {return pos_;}
+  double x() const {return pos_.x();}
+  double y() const {return pos_.y();}
+  std::vector<int> ships() const {return ships_;}
   Planet* dest() {return dest_;}
-  Planet* start() {return start_;}
-  int onwer() {return owner_;}
   int owner() const {return owner_;}
 
   //General use functions
@@ -40,11 +42,10 @@ class Fleet
   
  private:
   //Current coordinates of the fleet
-  float x_, y_;
+  Vec2f pos_;
 
-  //Target and source planets
+  //Destination planet
   Planet* dest_;
-  Planet* start_;
 
   //The speed, in pixels/second
   int speed_;

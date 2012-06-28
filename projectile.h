@@ -12,6 +12,7 @@
 
 #include <string>
 #include "fleet.h"
+#include "vec2f.h"
 
 const int DEFAULT_PROJECTILE_SPEED = 300;
 
@@ -20,13 +21,12 @@ class Projectile
  public:
   //Constructors
   Projectile();
-  Projectile(int xin, int yin, Fleet* dest, std::string effect, float speed);
+  Projectile(Vec2f start, Fleet* dest, std::string effect, float speed);
 
   //Accessors
-  float x() {return x_;}
-  float x() const {return x_;}
-  float y() {return y_;}
-  float y() const {return y_;}
+  Vec2f pos() const {return pos_;}
+  double x() const {return pos_.x();}
+  double y() const {return pos_.y();}
 
   //General use functions
   void update();
@@ -34,7 +34,7 @@ class Projectile
   
  private:
   //Current coordinates of the projectile
-  float x_, y_;
+  Vec2f pos_;
 
   //Source coordinates and target fleet
   int startx_, starty_;
