@@ -52,7 +52,6 @@ class Planet
   unsigned int buildcount() const {return building_.size();}
   BuildingInstance* building(int i) {return &(building_[i]);}
   Vec2f buildcoords(int i);
-  int owner() {return owner_;}
   int owner() const {return owner_;}
   int buildIndex() const {return buildIndex_;}
 

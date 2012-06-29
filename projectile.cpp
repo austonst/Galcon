@@ -19,7 +19,7 @@ Projectile::Projectile() {};
 //Regular constructor
 Projectile::Projectile(Vec2f start, Fleet* dest, std::string effect, float speed):
   pos_(start),
-  dest_(dest),
+  target_(dest),
   speed_(DEFAULT_PROJECTILE_SPEED*speed),
   effect_(effect),
   lastTicks_(0) {}
@@ -41,7 +41,7 @@ void Projectile::update()
 
   //Move projectile towards destination
   //Find target coordinates
-  Vec2f tar = dest_->pos();
+  Vec2f tar = target_->pos();
 
   //Find the vector to apply
   Vec2f diff = tar-pos_;
@@ -50,20 +50,6 @@ void Projectile::update()
 
   //Move it
   pos_ += diff;
-
-  /*
-  //Move projectile towards destination
-  //Find target coordinates
-  float tarx = dest_->x();
-  float tary = dest_->y();
-
-  //Find percentage of total distance traveled this time step
-  float dist = (speed_*(dt/1000.0))/std::sqrt(((tarx-startx_)*(tarx-startx_)) + ((tary-starty_)*(tary-starty_)));
-
-  //Change location based on that
-  x_ += (tarx-startx_) * dist;
-  y_ += (tary-starty_) * dist;
-  */
 }
 
 //Displays the projectile

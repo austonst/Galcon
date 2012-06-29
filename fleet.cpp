@@ -59,24 +59,6 @@ void Fleet::update()
 
   //Move the fleet
   pos_ += diff;
-
-  /*
-  //Move fleet towards destination
-  //Find target coordinates
-  float tarx = dest_->x() + (UNSCALED_PLANET_RADIUS * dest_->size());
-  float tary = dest_->y() + (UNSCALED_PLANET_RADIUS * dest_->size());
-
-  //Find source coordinates
-  float starx = start_->x() + (UNSCALED_PLANET_RADIUS * start_->size());
-  float stary = start_->y() + (UNSCALED_PLANET_RADIUS * start_->size());
-  
-  //Find percentage of total distance traveled this time step
-  float dist = (speed_*(dt/1000.0))/std::sqrt(((tarx-starx)*(tarx-starx)) + ((tary-stary)*(tary-stary)));
-
-  //Change location based on that
-  x_ += (tarx-starx) * dist;
-  y_ += (tary-stary) * dist;
-  */
 }
 
 //Display function

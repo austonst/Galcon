@@ -27,6 +27,8 @@ class Projectile
   Vec2f pos() const {return pos_;}
   double x() const {return pos_.x();}
   double y() const {return pos_.y();}
+  Fleet* target() {return target_;}
+  std::string effect() const {return effect_;}
 
   //General use functions
   void update();
@@ -36,9 +38,8 @@ class Projectile
   //Current coordinates of the projectile
   Vec2f pos_;
 
-  //Source coordinates and target fleet
-  int startx_, starty_;
-  Fleet* dest_;
+  //Target fleet
+  Fleet* target_;
 
   //The speed, in pixels per second
   int speed_;

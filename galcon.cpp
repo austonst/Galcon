@@ -368,6 +368,16 @@ int main(int argc, char* argv[])
 		  (*((*i).dest())).takeAttack((*i).ships(), (*i).owner(), shipStats, indicator);
 		}
 
+	      //Delete all projectiles with this fleet as its target
+	      for (projectileIter pi = projectiles.begin(); pi != projectiles.end(); pi++)
+		{
+		  if (pi->target() == &(*(i)))
+		    {
+		      pi = projectiles.erase(pi);
+		      pi--;
+		    }
+		}
+
 	      //Delete the fleet
 	      i = fleets.erase(i);
 	      i--;
@@ -398,6 +408,10 @@ int main(int argc, char* argv[])
 	      
 	      //Skip over nonexistant and incomplete buildings
 	      if (!(b->exists()) || j == Uint32(i->buildIndex())) continue;
+
+	      //Try to make it fire, remember result
+	      bool fire = b->fire();
+	      
 	      //Create a string stream and vector for tokens
 	      std::stringstream ss(b->effect());
 	      std::string item;
@@ -423,6 +437,8 @@ int main(int argc, char* argv[])
 		  Vec2f coords = i->buildcoords(j);
 		  for (fleetIter k = fleets.begin(); k != fleets.end(); k++)
 		    {
+		      //Only check further if it's an enemy fleet
+		      if (k->owner() == i->owner()) continue;
 		      //Compute the distance between them
 		      double dist = (coords-k->pos()).length();
 		      
@@ -440,9 +456,13 @@ int main(int argc, char* argv[])
 		  //Fire a projectile from the building to the fleet
 		  if (closest != NULL)
 		    {
-		      if (b->fire())
+		      if (fire)
 			{
-			  projectiles.push_back(Projectile(coords, closest, b->effect(), std::atof(tokens[tokens.size()-1].c_str())));
+			  //Create a proper string for the projectile
+			  std::string projstr;
+			  for (unsigned int word = 1; word < tokens.size()-1; word++)
+			    { projstr += tokens[word] + " "; }
+			  projectiles.push_back(Projectile(coords, closest, projstr, std::atof(tokens[tokens.size()-1].c_str())));
 			}
 		    }
 		}
@@ -455,6 +475,59 @@ int main(int argc, char* argv[])
       for (projectileIter i = projectiles.begin(); i != projectiles.end(); i++)
 	{
 	  (*i).update();
+
+	  //Check if the projectile has hit its target fleet
+	  if ((i->pos() - i->target()->pos()).length() < 12.345) //MAGIC NUMBER >:(
+	    {
+	      //Tokenize string to determine effect
+	      std::stringstream ss(i->effect());
+	      std::string item;
+	      std::vector<std::string> tokens;
+	      while (std::getline(ss, item, ' '))
+		{
+		  tokens.push_back(item);
+		}
+
+	      //Damage: damage <amount>
+	      if (tokens[0] == "damage")
+		{
+		  //Ensure size of two
+		  if (tokens.size() != 2) continue;
+
+		  //Deliver the damage
+		  //Check to see if the fleet is destroyed by this
+		  if (!(i->target()->takeHit(std::atof(tokens[1].c_str()), shipStats)))
+		    {
+		      //Delete the fleet
+		      for (fleetIter fi = fleets.begin(); fi != fleets.end(); fi++)
+			{
+			  if (&(*fi) == &(*(i->target())))
+			    {
+			      fleets.erase(fi);
+			      break;
+			    }
+			}
+
+		      //Delete all projectiles with this fleet as the target
+		      for (projectileIter pi = projectiles.begin(); pi != projectiles.end(); pi++)
+			{
+			  if (pi->target() == i->target())
+			    {
+			      if (pi == i) continue;
+			      pi = projectiles.erase(pi);
+			      pi--;
+			    }
+			}
+
+		    }
+
+		  //Either way, destroy this projectile
+		  i = projectiles.erase(i);
+		  i--;
+		  continue;
+		}
+	    }
+
 	  (*i).display(screen, camera);
 	}
 
