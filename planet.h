@@ -20,7 +20,7 @@
 #define _planet_h_
 
 const int NUM_PLANET_ROTATIONS = 500;
-const int UNSCALED_PLANET_RADIUS = 100;
+const int UNSCALED_PLANET_RADIUS = 50;
 
 class Planet
 {

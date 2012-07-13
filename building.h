@@ -16,7 +16,7 @@
 #define _building_h_
 
 const int NUM_BUILDING_ROTATIONS = 500;
-const int BUILDING_WIDTH = 100;
+const int BUILDING_WIDTH = 50;
 
 class Building
 {

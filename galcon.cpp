@@ -22,8 +22,8 @@
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
-const int LEVEL_WIDTH = 2400;
-const int LEVEL_HEIGHT = 1800;
+const int LEVEL_WIDTH = 800;
+const int LEVEL_HEIGHT = 600;
 const int CAMERA_SPEED = 200;
 
 SDL_Surface* loadImage(std::string filename)
@@ -198,20 +198,23 @@ int main(int argc, char* argv[])
   double density = 0.15;
   double totalSize = LEVEL_WIDTH*LEVEL_HEIGHT;
   double currentSize = M_PI*UNSCALED_PLANET_RADIUS*UNSCALED_PLANET_RADIUS*2;
-  double spacing = 300;
+  double spacing = 20;
   
   while (currentSize/totalSize < density && tries < maxTries)
     {
       //Create a new planet at a completely random location with a random size
-      Planet p(planetimg, (double(rand())/double(RAND_MAX))/0.7 + 0.6,
-	       Vec2f(rand()%(LEVEL_WIDTH-(2*UNSCALED_PLANET_RADIUS)),
-		     rand()%(LEVEL_HEIGHT-(2*UNSCALED_PLANET_RADIUS))), 1);
+      float psize = (double(rand())/double(RAND_MAX))*0.7 + 0.6;
+      Planet p(planetimg, psize,
+	       Vec2f(rand()%(LEVEL_WIDTH-int(2*UNSCALED_PLANET_RADIUS*psize)),
+		     rand()%(LEVEL_HEIGHT-int(2*UNSCALED_PLANET_RADIUS*psize))), 1);
 
       //Make sure it doesn't collide with any other planets
       bool skip = false;
       for (planetIter pi = planets.begin(); pi != planets.end(); pi++)
 	{
-	  if ((p.pos()-pi->pos()).length() <
+	  Vec2f ppos = p.pos()+Vec2f(UNSCALED_PLANET_RADIUS*p.size(),UNSCALED_PLANET_RADIUS*p.size());
+	  Vec2f pipos = pi->pos()+Vec2f(UNSCALED_PLANET_RADIUS*pi->size(),UNSCALED_PLANET_RADIUS*pi->size());
+	  if ((pipos-ppos).length() <
 	      p.size()*UNSCALED_PLANET_RADIUS +
 	      pi->size()*UNSCALED_PLANET_RADIUS + spacing)
 	    {

@@ -102,8 +102,9 @@ void Planet::display(SDL_Surface* screen, TTF_Font* font, const SDL_Rect& camera
   //Draw indicator
   if (owner_ != 0)
     {
-      outrect.x = pos_.x() - (12 * size_) - camera.x;
-      outrect.y = pos_.y() - (12 * size_) - camera.y;
+      //Magic numbers here! Change?
+      outrect.x = pos_.x() - (6 * size_) - camera.x;
+      outrect.y = pos_.y() - (6 * size_) - camera.y;
       SDL_BlitSurface(indicator_, NULL, screen, &outrect);
     }
 
@@ -513,7 +514,7 @@ Vec2f Planet::buildcoords(int i)
 void Planet::setOwner(const int inowner, SDL_Surface* indicator[])
 {
   owner_ = inowner;
-  if (owner_ != 0) indicator_ = scaleNN(indicator[owner_], size_);
+  if (owner_ != 0) indicator_ = scaleNN(indicator[owner_], size_); //Magic number
 }
 
 #endif
