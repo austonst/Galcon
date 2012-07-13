@@ -17,11 +17,13 @@
 #include <list>
 #include <cmath>
 #include <sstream>
+#include <ctime>
+#include <cstdlib>
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
-const int LEVEL_WIDTH = 1600;
-const int LEVEL_HEIGHT = 1200;
+const int LEVEL_WIDTH = 2400;
+const int LEVEL_HEIGHT = 1800;
 const int CAMERA_SPEED = 200;
 
 SDL_Surface* loadImage(std::string filename)
@@ -65,6 +67,9 @@ int main(int argc, char* argv[])
     // INITIALIZATION
     -----
   */
+
+  //Seed RNG
+  srand(time(NULL));
   
   //Initialize all SDL subsystems
   if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
@@ -136,17 +141,19 @@ int main(int argc, char* argv[])
   //The standard rate of production of basic ship 0
   float ship0rate = 1.0;
 
-  //Add a few planets
-  SDL_Surface* planetimg = loadImage("planet.png");
-  planets.push_back(Planet(planetimg, 1.2, Vec2f(200, 200), 1));
-  planets.push_back(Planet(planetimg, 0.6, Vec2f(750, 550), 0));
-  planets.push_back(Planet(planetimg, 1.0, Vec2f(1000, 900), 0));
-  SDL_FreeSurface(planetimg);
-
   //The array of indicators
   SDL_Surface* indicator[3];
   indicator[1] = loadImage("selectorb.png");
   indicator[2] = loadImage("selectorr.png");
+  
+  //Add a few planets
+  //The following block comments provide a specific setting for testing purposes
+  SDL_Surface* planetimg = loadImage("planet.png");
+  /*
+  planets.push_back(Planet(planetimg, 1.2, Vec2f(200, 200), 1));
+  planets.push_back(Planet(planetimg, 0.6, Vec2f(750, 550), 0));
+  planets.push_back(Planet(planetimg, 1.0, Vec2f(1000, 900), 0));
+  SDL_FreeSurface(planetimg);
 
   //Give them some attributes
   planetIter pi = planets.begin();
@@ -168,7 +175,70 @@ int main(int argc, char* argv[])
   (*pi).setOwner(0, indicator);
   (*pi).setShipRate(0, ship0rate);
   (*pi).setDifficulty(30);
+  */
 
+  //Create the planets at random
+  //First, create two home planets
+  planets.push_back(Planet(planetimg, 1.0,
+			   Vec2f(rand()%100, 100 + rand()%(LEVEL_HEIGHT-200)), 1));
+  planets.back().setOwner(1, indicator);
+  planets.back().setShipRate(0, ship0rate);
+  planets.back().setRotSpeed(M_PI/20);
+  planets.push_back(Planet(planetimg, 1.0,
+			   Vec2f(LEVEL_WIDTH-(2*UNSCALED_PLANET_RADIUS)-(rand()%100),
+				 100 + rand()%(LEVEL_HEIGHT-200)), 1));
+  planets.back().setOwner(2, indicator);
+  planets.back().setShipRate(0, ship0rate);
+  planets.back().setRotSpeed(M_PI/20);
+
+  //Now repeatedly create planets until either a target density is reached
+  //or we go too many tries without finding a spot for a new planet.
+  char tries = 0;
+  char maxTries = 10;
+  double density = 0.15;
+  double totalSize = LEVEL_WIDTH*LEVEL_HEIGHT;
+  double currentSize = M_PI*UNSCALED_PLANET_RADIUS*UNSCALED_PLANET_RADIUS*2;
+  double spacing = 300;
+  
+  while (currentSize/totalSize < density && tries < maxTries)
+    {
+      //Create a new planet at a completely random location with a random size
+      Planet p(planetimg, (double(rand())/double(RAND_MAX))/0.7 + 0.6,
+	       Vec2f(rand()%(LEVEL_WIDTH-(2*UNSCALED_PLANET_RADIUS)),
+		     rand()%(LEVEL_HEIGHT-(2*UNSCALED_PLANET_RADIUS))), 1);
+
+      //Make sure it doesn't collide with any other planets
+      bool skip = false;
+      for (planetIter pi = planets.begin(); pi != planets.end(); pi++)
+	{
+	  if ((p.pos()-pi->pos()).length() <
+	      p.size()*UNSCALED_PLANET_RADIUS +
+	      pi->size()*UNSCALED_PLANET_RADIUS + spacing)
+	    {
+	      //There's a collision. Increment tries and try again
+	      tries++;
+	      skip = true;
+	      break;
+	    }
+	}
+      if (skip) continue;
+
+      //At this point, we know there's no collision. Reset tries
+      tries = 0;
+
+      //Add a few more random attributes
+      p.setOwner(0, indicator);
+      p.setShipRate(0, ship0rate);
+      p.setRotSpeed((fmod(rand(),M_PI)/5) - M_PI/10);
+      p.setDifficulty(p.size()*20 + rand()%20 - 10);
+
+      //Add this planet to the current size
+      currentSize += M_PI*(UNSCALED_PLANET_RADIUS*p.size())*(UNSCALED_PLANET_RADIUS*p.size());
+
+      //Add it to the list
+      planets.push_back(p);
+    }
+  
   //Set up fleet list
   std::list<Fleet> fleets;
 
