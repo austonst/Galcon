@@ -126,13 +126,14 @@ int main(int argc, char* argv[])
   SDL_Surface* buildimg = loadImage("building.png");
   SDL_Surface* buildconstimg = loadImage("buildingconstruct.png");
   buildings.push_back(Building(buildimg, buildconstimg, "build 1 5"));
-  buildings.push_back(Building(buildimg, buildconstimg, "fire damage 3 1"));
+  buildings.push_back(Building(buildimg, buildconstimg, "fire damage 2 1"));
   std::list<Building>::iterator bi = buildings.begin();
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(10000);
   bi++;
   buildRules[1].push_back(&(*bi));
-  bi->setBuildTime(5000);
+  bi->setBuildTime(10000);
+  bi->setRange(250);
   SDL_FreeSurface(buildimg);
   SDL_FreeSurface(buildconstimg);
 

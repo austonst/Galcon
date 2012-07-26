@@ -14,7 +14,7 @@
 #include "fleet.h"
 #include "vec2f.h"
 
-const int DEFAULT_PROJECTILE_SPEED = 300;
+const int DEFAULT_PROJECTILE_SPEED = 200;
 
 class Projectile
 {
