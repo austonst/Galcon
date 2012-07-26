@@ -61,7 +61,7 @@ class GalconAI
   //General use functions
   void init(std::list<Planet> & planets, const std::vector<std::pair<float, float> > & shipStats);
   commandList rebalance(const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats);
-  void computeTarget(std::list<Planet> & planets, const std::vector<std::pair<float, float> > & shipStats);
+  void computeTarget(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats);
   commandList attack(const std::vector<std::pair<float, float> > & shipStats);
   commandList update(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats);
 

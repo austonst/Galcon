@@ -32,6 +32,28 @@ Fleet::Fleet(const std::vector<int>& inships, Planet* begin, Planet* end):
 {
 }
 
+//Returns the total attack power of the fleet
+float Fleet::totalAttack(const std::vector<std::pair<float, float> >& shipstats) const
+{
+  float att = 0;
+  for (unsigned int i = 0; i < ships_.size(); i++)
+    {
+      att += float(ships_[i]) * shipstats[i].first;
+    }
+  return att;
+}
+
+//Returns the total defense of the fleet
+float Fleet::totalDefense(const std::vector<std::pair<float, float> >& shipstats) const
+{
+  float def = 0;
+  for (unsigned int i = 0; i < ships_.size(); i++)
+    {
+      def += float(ships_[i]) * shipstats[i].second;
+    }
+  return def;
+}
+
 //Update function
 void Fleet::update()
 {

@@ -34,6 +34,8 @@ class Fleet
   std::vector<int> ships() const {return ships_;}
   Planet* dest() const {return dest_;}
   int owner() const {return owner_;}
+  float totalAttack(const std::vector<std::pair<float, float> >& shipstats) const;
+  float totalDefense(const std::vector<std::pair<float, float> >& shipstats) const;
 
   //General use functions
   void update();

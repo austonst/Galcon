@@ -207,9 +207,39 @@ commandList GalconAI::rebalance(const std::list<Fleet> & fleets, const std::vect
 }
 
 //Computes the optimal target to attack and stores the result.
-void GalconAI::computeTarget(std::list<Planet> & planets, const std::vector<std::pair<float, float> > & shipStats)
+void GalconAI::computeTarget(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats)
 {
-  //Find the best one
+  //Store the distance from each planet to the nearest owned planet
+  std::map<Planet*, float> distWeight;
+  float maximin = 0;
+  for (planetIter i = planets.begin(); i != planets.end(); i++)
+    {
+      //Don't store distance to planets you own
+      if (i->owner() == player_) continue;
+
+      //Find the closest
+      float closestDist = -1;
+
+      for (planetPtrIter j = planets_.begin(); j != planets_.end(); j++)
+	{
+	  //If it's closer
+	  if (((*j)->center() - i->center()).length() < closestDist || closestDist == -1)
+	    {
+	      closestDist = ((*j)->center() - i->center()).length();
+	    }
+	}
+
+      //We want the distance weighting to follow a log scale
+      //closestDist = log(closestDist);
+
+      //Add it to the map
+      distWeight[&(*i)] = closestDist;
+
+      //Update maximin if needed
+      if (closestDist > maximin) maximin = closestDist;
+    }
+  
+  //Find the best target
   Planet* bestPlanet = NULL;
   float bestRatio = -1;
 
@@ -225,12 +255,38 @@ void GalconAI::computeTarget(std::list<Planet> & planets, const std::vector<std:
 	{
 	  defense += float(ships[j]) * shipStats[j].second;
 	}
+
+      //Take into account any fleets moving to this planet
+      for (fleetIterConst k = fleets.begin(); k != fleets.end(); k++)
+	{
+	  //Only do stuff for fleets going to this planet
+	  if (k->dest() != &(*i)) continue;
+
+	  //Fleet owned by owner of planet
+	  if (k->owner() == i->owner())
+	    {
+	      //Add the defense
+	      defense += k->totalDefense(shipStats);
+	    }
+	  else if (k->owner() != i->owner() && k->owner() != player_) //Third party
+	    {
+	      //Subtract the attack of the fleet
+	      defense -= k->totalAttack(shipStats);
+	    }
+	  //We don't care about our own fleets
+	}
       
       //Compute ratio
-      if (defense / i->size() < bestRatio || bestPlanet == NULL)
+      float ratio = defense / i->size();
+
+      //Weight it by distance
+      ratio *= distWeight[&(*i)] / maximin;
+
+      //Compare it
+      if (ratio < bestRatio || bestPlanet == NULL)
 	{
 	  bestPlanet = &(*i);
-	  bestRatio = defense / i->size();
+	  bestRatio = ratio;
 	}
     }
 
@@ -253,6 +309,9 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
       defense += float(targetShips[j]) * shipStats[j].second;
     }
 
+  //Ensure at least one ship is sent each attack
+  if (defense < 1) defense = 1;
+
   //Create return commandList
   commandList ret;
 
@@ -261,7 +320,7 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
   
   //Compare attack reserves to the defense of the target
   float attack = defense * (1+set_.attackExtra);
-  std::cout <<  "Defense: " << attack << " Attack: " << attTotal_ << std::endl;
+  std::cout << "Attackers: " << attTotal_ << " Defenders: " << attack << std::endl;
   if (attTotal_ < attack) return ret;
 
   //Since we have enough ships to attack, send from nearest planets
@@ -336,6 +395,7 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
 //An easy to use, do-everything-in-one-call sort of function
 commandList GalconAI::update(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats)
 {
+  std::cout << "Update) Attack: " << attTotal_ << " Defense: " << defTotal_ << std::endl;
   //Set up the list of commands
   commandList rb;
   
@@ -345,7 +405,7 @@ commandList GalconAI::update(std::list<Planet> & planets, const std::list<Fleet>
   updateTime_ = time;
   
   //Compute the best target
-  computeTarget(planets, shipStats);
+  computeTarget(planets, fleets, shipStats);
 
   //Get the commands from rebalancing and attacking
   rb = rebalance(fleets, shipStats);
@@ -364,9 +424,8 @@ commandList GalconAI::update(std::list<Planet> & planets, const std::list<Fleet>
 //Notify the AI that ships with the inputted totals have been constructed
 void GalconAI::notifyConstruction(float attack, float defense)
 {
-  std::cout << "Construction) " << attack << " attack and " << defense << " defense" << std::endl;
-  attTotal_ += attack;
-  defTotal_ += defense;
+  attTotal_ += attack * set_.attackFraction;
+  defTotal_ += defense * (1-set_.attackFraction);
 }
 
 //Notify the AI that it has lost ships while defending a planet

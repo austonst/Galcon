@@ -55,6 +55,8 @@ class Planet
   Vec2f buildcoords(int i);
   int owner() const {return owner_;}
   int buildIndex() const {return buildIndex_;}
+  float totalAttack(const std::vector<std::pair<float, float> >& shipstats) const;
+  float totalDefense(const std::vector<std::pair<float, float> >& shipstats) const;
 
   //Mutators
   void setImage(SDL_Surface* insurf) {rotation_ = RotationCache(insurf, NUM_PLANET_ROTATIONS);}

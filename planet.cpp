@@ -60,6 +60,28 @@ Planet::Planet(SDL_Surface* surf, float size, Vec2f loc, int type):
   ship_.resize(10);
 }
 
+//Returns the total attack power of the planet
+float Planet::totalAttack(const std::vector<std::pair<float, float> >& shipstats) const
+{
+  float att = 0;
+  for (unsigned int i = 0; i < ship_.size(); i++)
+    {
+      att += float(ship_[i].first) * shipstats[i].first;
+    }
+  return att;
+}
+
+//Returns the total defense of the planet
+float Planet::totalDefense(const std::vector<std::pair<float, float> >& shipstats) const
+{
+  float def = 0;
+  for (unsigned int i = 0; i < ship_.size(); i++)
+    {
+      def += float(ship_[i].first) * shipstats[i].second;
+    }
+  return def;
+}
+
 //Displays the current rotation of the planet to the screen along with each building
 void Planet::display(SDL_Surface* screen, TTF_Font* font, const SDL_Rect& camera)
 {
