@@ -18,7 +18,7 @@
 #include "vec2f.h"
 #include "planet.h"
 
-const int DEFAULT_FLEET_SPEED = 100;
+const int DEFAULT_FLEET_SPEED = 60;
 
 class Fleet
 {

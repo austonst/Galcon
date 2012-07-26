@@ -180,17 +180,21 @@ int main(int argc, char* argv[])
 
   //Create the planets at random
   //First, create two home planets
+  std::vector<int> homestart;
+  homestart.resize(1,3);
   planets.push_back(Planet(planetimg, 1.0,
 			   Vec2f(rand()%100, 100 + rand()%(LEVEL_HEIGHT-200)), 1));
   planets.back().setOwner(1, indicator);
   planets.back().setShipRate(0, ship0rate);
   planets.back().setRotSpeed(M_PI/20);
+  planets.back().addShips(homestart);
   planets.push_back(Planet(planetimg, 1.0,
 			   Vec2f(LEVEL_WIDTH-(2*UNSCALED_PLANET_RADIUS)-(rand()%100),
 				 100 + rand()%(LEVEL_HEIGHT-200)), 1));
   planets.back().setOwner(2, indicator);
   planets.back().setShipRate(0, ship0rate);
   planets.back().setRotSpeed(M_PI/20);
+  planets.back().addShips(homestart);
 
   //Now repeatedly create planets until either a target density is reached
   //or we go too many tries without finding a spot for a new planet.
@@ -204,7 +208,7 @@ int main(int argc, char* argv[])
   while (currentSize/totalSize < density && tries < maxTries)
     {
       //Create a new planet at a completely random location with a random size
-      float psize = (double(rand())/double(RAND_MAX))*0.7 + 0.6;
+      float psize = (double(rand())/double(RAND_MAX))*0.7 + 0.5;
       Planet p(planetimg, psize,
 	       Vec2f(rand()%(LEVEL_WIDTH-int(2*UNSCALED_PLANET_RADIUS*psize)),
 		     rand()%(LEVEL_HEIGHT-int(2*UNSCALED_PLANET_RADIUS*psize))), 1);
@@ -234,7 +238,7 @@ int main(int argc, char* argv[])
       p.setOwner(0, indicator);
       p.setShipRate(0, ship0rate);
       p.setRotSpeed((fmod(rand(),M_PI)/5) - M_PI/10);
-      p.setDifficulty(p.size()*20 + rand()%20 - 10);
+      p.setDifficulty(p.size()*20 + rand()%15 - 9);
 
       //Add this planet to the current size
       currentSize += M_PI*(UNSCALED_PLANET_RADIUS*p.size())*(UNSCALED_PLANET_RADIUS*p.size());
@@ -261,7 +265,7 @@ int main(int argc, char* argv[])
   //For now, AI controls player 2
   GalconAISettings aiSet;
   aiSet.attackFraction = .8;
-  aiSet.surplusDefecitThreshold = .1;
+  aiSet.surplusDefecitThreshold = .25;
   aiSet.attackExtra = .3;
   aiSet.perPlanetAttackStrength = .5;
   aiSet.delay = 200;
