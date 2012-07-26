@@ -5,10 +5,10 @@ OUTPUT=-o galcon
 
 all: galcon
 
-galcon: building.o fleet.o planet.o rotationcache.o scale.o galcon.o projectile.o buildingInstance.o
-	$(CC) building.o fleet.o planet.o rotationcache.o scale.o galcon.o projectile.o buildingInstance.o $(LDFLAGS) $(OUTPUT)
+galcon: building.o fleet.o planet.o rotationcache.o scale.o galcon.o projectile.o buildingInstance.o ai.o
+	$(CC) building.o fleet.o planet.o rotationcache.o scale.o galcon.o projectile.o buildingInstance.o ai.o $(LDFLAGS) $(OUTPUT)
 
-galcon.o: galcon.cpp planet.o fleet.o vec2f.h
+galcon.o: galcon.cpp planet.o fleet.o ai.o vec2f.h
 	$(CC) galcon.cpp $(CFLAGS)
 
 building.o: building.cpp building.h rotationcache.o vec2f.h
@@ -31,3 +31,6 @@ projectile.o: projectile.cpp projectile.h vec2f.h
 
 buildingInstance.o: buildingInstance.cpp buildingInstance.h building.o vec2f.h
 	$(CC) buildingInstance.cpp $(CFLAGS)
+
+ai.o: ai.cpp ai.h planet.h fleet.h
+	$(CC) ai.cpp $(CFLAGS)

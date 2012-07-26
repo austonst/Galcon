@@ -481,7 +481,7 @@ SDL_Surface* Planet::rotation(float angle)
 }
 
 //Returns a vector of ship counts
-std::vector<int> Planet::shipcount()
+std::vector<int> Planet::shipcount() const
 {
   //Make the vector
   std::vector<int> outships(ship_.size());

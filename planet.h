@@ -43,12 +43,13 @@ class Planet
   //Accessors
   SDL_Surface* rotation(float angle = -1);
   Vec2f pos() const {return pos_;}
+  Vec2f center() const {Vec2f c = pos()+Vec2f(UNSCALED_PLANET_RADIUS,UNSCALED_PLANET_RADIUS); return c;}
   double x() const {return pos_.x();}
   double y() const {return pos_.y();}
   float size() const {return size_;}
   char type() const {return type_;}
-  float shipcount(int index) {return ship_[index].first;}
-  std::vector<int> shipcount();
+  float shipcount(int index) const {return ship_[index].first;}
+  std::vector<int> shipcount() const;
   unsigned int buildcount() const {return building_.size();}
   BuildingInstance* building(int i) {return &(building_[i]);}
   Vec2f buildcoords(int i);
@@ -113,5 +114,7 @@ class Planet
   
 typedef std::list<Planet>::iterator planetIter;
 typedef std::list<Planet>::const_iterator planetIterConst;
+typedef std::list<Planet*>::iterator planetPtrIter;
+typedef std::list<Planet*>::const_iterator planetPtrIterConst;
 
 #endif

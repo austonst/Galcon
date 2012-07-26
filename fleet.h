@@ -32,7 +32,7 @@ class Fleet
   double x() const {return pos_.x();}
   double y() const {return pos_.y();}
   std::vector<int> ships() const {return ships_;}
-  Planet* dest() {return dest_;}
+  Planet* dest() const {return dest_;}
   int owner() const {return owner_;}
 
   //General use functions

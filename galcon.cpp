@@ -2,7 +2,7 @@
   -----Galcon Game Main Body-----
   Auston Serling
   austonst@gmail.com
-  6/28/12
+  7/24/12
 
   Contains the main body for the game "Galcon" (Unnamed so far).
 */
@@ -11,6 +11,7 @@
 #include "fleet.h"
 #include "projectile.h"
 #include "vec2f.h"
+#include "ai.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
 #include "SDL/SDL_ttf.h"
@@ -254,6 +255,20 @@ int main(int argc, char* argv[])
   //The currently selected planet
   planetIter selectPlanet = planNull;
 
+  //Set up AI
+  std::list<GalconAI> ai;
+
+  //For now, AI controls player 2
+  GalconAISettings aiSet;
+  aiSet.attackFraction = .8;
+  aiSet.surplusDefecitThreshold = .1;
+  aiSet.attackExtra = .3;
+  aiSet.perPlanetAttackStrength = .5;
+  aiSet.delay = 200;
+  ai.push_back(GalconAI(2, aiSet));
+  ai.begin()->init(planets, shipStats);
+  ai.begin()->activate();
+
   //The number of the locally playing player
   char localPlayer = 1;
   
@@ -438,7 +453,64 @@ int main(int argc, char* argv[])
 	      else //Hostile
 		{
 		  //Attack!
+		  //Get ship counts before the attack
+		  std::vector<int> ships1 = i->dest()->shipcount();
+		  int oldowner = i->dest()->owner();
+
+		  //Actually do the attack
 		  (*((*i).dest())).takeAttack((*i).ships(), (*i).owner(), shipStats, indicator);
+
+		  //Get ship counts after the attack
+		  std::vector<int> ships2 = i->dest()->shipcount();
+
+		  //Notify the defending AI about the losses
+		  for (std::list<GalconAI>::iterator j = ai.begin(); j != ai.end(); j++)
+		    {
+		      if (oldowner != j->player()) continue;
+		      float newdefense = 0;
+		      for (unsigned int k = 0; k < ships1.size(); k++)
+			{
+			  int diff;
+			  //If ownership has changed
+			  if (oldowner != i->dest()->owner())
+			    {
+			      diff = ships1[k];
+			      j->notifyPlanetLoss(i->dest());
+			    }
+			  else
+			    {
+			      diff = ships1[k] - ships2[k];
+			    }
+			  
+			  newdefense += diff * shipStats[k].second;
+			}
+		      j->notifyDefendLoss(newdefense);
+		    }
+
+		  //Notify the attacking AI about the losses
+		  for (std::list<GalconAI>::iterator j = ai.begin(); j != ai.end(); j++)
+		    {
+		      if (i->owner() != j->player()) continue;
+		      float lost = 0;
+		      for (unsigned int k = 0; k < ships1.size(); k++)
+			{
+			  int diff;
+			  //If the attack failed
+			  if (i->dest()->owner() != i->owner())
+			    {
+			      //Lost everything
+			      diff = i->ships()[k];
+			    }
+			  else //Successful attack
+			    {
+			      //Lose the difference
+			      diff = i->ships()[k] - ships2[k];
+			      j->notifyPlanetGain(i->dest());
+			    }
+			  lost += diff * shipStats[k].first;
+			}
+		      j->notifyAttackLoss(lost);
+		    }
 		}
 
 	      //Delete all projectiles with this fleet as its target
@@ -463,7 +535,29 @@ int main(int argc, char* argv[])
       //Update and display planets
       for (planetIter i = planets.begin(); i != planets.end(); i++)
 	{
+	  //Get ship counts before the update
+	  std::vector<int> ships1 = i->shipcount();
+
+	  //Update the planet
 	  (*i).update();
+
+	  //Get ship counts after the update
+	  std::vector<int> ships2 = i->shipcount();
+
+	  //Notify a controlling AI about the construction
+	  for (std::list<GalconAI>::iterator j = ai.begin(); j != ai.end(); j++)
+	    {
+	      if (i->owner() != j->player()) continue;
+	      float newattack = 0;
+	      float newdefense = 0;
+	      for (unsigned int k = 0; k < ships1.size(); k++)
+		{
+		  int diff = ships2[k] - ships1[k];
+		  newattack += diff * shipStats[k].first;
+		  newdefense += diff * shipStats[k].second;
+		}
+	      j->notifyConstruction(newattack, newdefense);
+	    }
 
 	  //If this planet is selected, add an indicator
 	  if (i == selectPlanet)
@@ -602,6 +696,84 @@ int main(int argc, char* argv[])
 	    }
 
 	  (*i).display(screen, camera);
+	}
+
+      //Perform AI calculations
+      for (std::list<GalconAI>::iterator i = ai.begin(); i != ai.end(); i++)
+	{
+	  //Get the command list
+	  commandList com = i->update(planets, fleets, shipStats);
+
+	  //Execute each command
+	  for (commandList::iterator j = com.begin(); j != com.end(); j++)
+	    {
+	      //Extract the info from the command
+	      Planet* source = j->first;
+	      int amount = j->second.first;
+	      Planet* dest = j->second.second;
+
+	      //Get the number of ships from the source
+	      std::vector<int> ships = source->shipcount();
+
+	      //Start building a fleet
+	      std::vector<int> newfleet;
+	      newfleet.resize(ships.size());
+	      int total = 0;
+	      for (unsigned int k = 0; k < ships.size(); k++)
+		{
+		  //Handle it differently for attack or defense
+		  float typeTotal;
+		  if (dest->owner() == source->owner())
+		    {
+		      //Check the total defense of this ship type
+		      typeTotal = ships[k] * shipStats[k].second;
+		    }
+		  else
+		    {
+		      //Check the total attack of this ship type
+		      typeTotal = ships[k] * shipStats[k].first;
+		    }
+		  
+		  //If there's more ships requested than there are of this type
+		  if (total + typeTotal <= amount)
+		    {
+		      //Add them all
+		      newfleet[k] += ships[k];
+		      total += typeTotal;
+		    }
+		  else //More ships than space in the requested fleet
+		    {
+		      //Find the proper amount
+		      //# of ships to send = defense requested / def per ship
+		      float properAmount = (amount - total) / (typeTotal / ships[k]);
+		      newfleet[k] += properAmount;
+		      break;
+		    }
+		}
+
+	      //Refuse to send a fleet with no ships
+	      bool sendfleet = false;
+	      for (unsigned int k = 0; k < newfleet.size(); k++)
+		{
+		  if (newfleet[k] != 0)
+		    {
+		      sendfleet = true;
+		      break;
+		    }
+		}
+	      if (!sendfleet) continue;
+	      
+	      //Fleet is built, send it
+	      fleets.push_back(Fleet(newfleet, source, dest));
+
+	      //Make sure to subtract the fleet from the original planet
+	      for (unsigned int k = 0; k < ships.size(); k++)
+		{
+		  newfleet[k] *= -1;
+		}
+	      source->addShips(newfleet);
+	      
+	    }
 	}
 
       //Flipoo
