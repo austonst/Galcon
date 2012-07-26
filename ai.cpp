@@ -77,13 +77,7 @@ commandList GalconAI::rebalance(const std::list<Fleet> & fleets, const std::vect
   for (planetPtrIter i = planets_.begin(); i != planets_.end(); i++)
     {
       //Find this planet's overall defense
-      std::vector<int> ships = (*i)->shipcount();
-      def[(*i)] = 0;
-      
-      for (unsigned int j = 0; j < ships.size(); j++)
-	{
-	  def[(*i)] += ships[j] * shipStats[j].second;
-	}
+      def[(*i)] = (*i)->totalDefense(shipStats);
 
       //Add or subtract incoming ships
       for (fleetIterConst j = fleets.begin(); j != fleets.end(); j++)
@@ -249,12 +243,7 @@ void GalconAI::computeTarget(std::list<Planet> & planets, const std::list<Fleet>
       if (i->owner() == player_) continue;
       
       //Find total defense
-      float defense = 0;
-      std::vector<int> ships = i->shipcount();
-      for (unsigned int j = 0; j < ships.size(); j++)
-	{
-	  defense += float(ships[j]) * shipStats[j].second;
-	}
+      float defense = i->totalDefense(shipStats);
 
       //Take into account any fleets moving to this planet
       for (fleetIterConst k = fleets.begin(); k != fleets.end(); k++)
@@ -302,12 +291,7 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
 {
   std::cout << "Attack) ";
   //Find total target defense
-  float defense = 0;
-  std::vector<int> targetShips = target_->shipcount();
-  for (unsigned int j = 0; j < targetShips.size(); j++)
-    {
-      defense += float(targetShips[j]) * shipStats[j].second;
-    }
+  float defense = target_->totalDefense(shipStats);
 
   //Ensure at least one ship is sent each attack
   if (defense < 1) defense = 1;
@@ -355,12 +339,7 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
 
       //Send ships from this planet to the target
       //Find total attack potential
-      float planetAttack = 0;
-      std::vector<int> planetShips = nearestPlanet->shipcount();
-      for (unsigned int j = 0; j < planetShips.size(); j++)
-	{
-	  planetAttack += float(planetShips[j]) * shipStats[j].first;
-	}
+      float planetAttack = nearestPlanet->totalAttack(shipStats);
 
       //Don't send them all
       //planetAttack *= set_.perPlanetAttackStrength;
