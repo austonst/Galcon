@@ -525,7 +525,7 @@ Vec2f Planet::buildcoords(int i)
   BuildingInstance b = building_[i];
 
   //Construct the coordinates
-  float angle = i*rot_;
+  float angle = (i * 2 * 3.14159265358979323 / building_.size()) + rot_;
   float rad = (UNSCALED_PLANET_RADIUS * size_) + b.rotation(0)->h/5;
 
   return Vec2f((std::cos(angle) * rad) + pos_.x() + (rotation_.rotation(0)->w/2),
