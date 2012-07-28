@@ -293,15 +293,18 @@ void GalconAI::computeTarget(std::list<Planet> & planets, const std::list<Fleet>
 //If so, return some commands to be executed
 commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipStats)
 {
+  //Create return commandList
+  commandList ret;
+  
   std::cout << "Attack) ";
+  //Refuse to attack a NULL target
+  if (!target_) return ret;
+  
   //Find total target defense
   float defense = target_->totalDefense(shipStats);
 
   //Ensure at least one ship is sent each attack
   if (defense < 1) defense = 1;
-
-  //Create return commandList
-  commandList ret;
 
   //If there is no target planet, we cannot attack
   if (target_ == NULL) return ret;
