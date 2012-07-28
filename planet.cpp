@@ -518,6 +518,22 @@ std::vector<int> Planet::shipcount() const
   return outships;
 }
 
+//Returns a vector of ship rates
+std::vector<float> Planet::shiprate() const
+{
+  //Make the vector
+  std::vector<float> outships(ship_.size());
+
+  //Copy values
+  for (unsigned int i = 0; i < ship_.size(); i++)
+    {
+      outships[i] = ship_[i].second;
+    }
+
+  //Return
+  return outships;
+}
+
 //Returns the coordinates of the base of a building
 Vec2f Planet::buildcoords(int i)
 {

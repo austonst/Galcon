@@ -50,6 +50,8 @@ class Planet
   char type() const {return type_;}
   float shipcount(int index) const {return ship_[index].first;}
   std::vector<int> shipcount() const;
+  float shiprate(int index) const {return ship_[index].second;}
+  std::vector<float> shiprate() const;
   unsigned int buildcount() const {return building_.size();}
   BuildingInstance* building(int i) {return &(building_[i]);}
   Vec2f buildcoords(int i);

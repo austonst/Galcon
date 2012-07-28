@@ -267,9 +267,12 @@ int main(int argc, char* argv[])
   GalconAISettings aiSet;
   aiSet.attackFraction = .8;
   aiSet.surplusDefecitThreshold = .25;
-  aiSet.attackExtra = .3;
+  aiSet.attackExtraNeutral = .3;
+  aiSet.attackExtraEnemy = .6;
   aiSet.perPlanetAttackStrength = .5;
   aiSet.delay = 200;
+  aiSet.maximumBuildingFraction = .3;
+  aiSet.minimumDefenseForBuilding = 10;
   ai.push_back(GalconAI(2, aiSet));
   ai.begin()->init(planets, shipStats);
   ai.begin()->activate();
@@ -667,6 +670,16 @@ int main(int argc, char* argv[])
 		  if (tokens.size() != 2) continue;
 
 		  //Deliver the damage
+
+		  //Notify the AI before we go around deleting things
+		  for (std::list<GalconAI>::iterator j = ai.begin(); j != ai.end(); j++)
+		    {
+		      if (j->player() == i->target()->owner())
+			{
+			  j->notifyFleetDamage(std::min(std::atof(tokens[1].c_str()), double(i->target()->totalDefense(shipStats))));
+			}
+		    }
+		  
 		  //Check to see if the fleet is destroyed by this
 		  if (!(i->target()->takeHit(std::atof(tokens[1].c_str()), shipStats)))
 		    {
@@ -707,7 +720,7 @@ int main(int argc, char* argv[])
       for (std::list<GalconAI>::iterator i = ai.begin(); i != ai.end(); i++)
 	{
 	  //Get the command list
-	  commandList com = i->update(planets, fleets, shipStats);
+	  commandList com = i->update(planets, fleets, shipStats, buildRules);
 
 	  //Execute each command
 	  for (commandList::iterator j = com.begin(); j != com.end(); j++)
@@ -716,6 +729,21 @@ int main(int argc, char* argv[])
 	      Planet* source = j->first;
 	      int amount = j->second.first;
 	      Planet* dest = j->second.second;
+
+	      //Handle building construction
+	      if (source == dest)
+		{
+		  std::list<Building*>::iterator build = buildRules[source->type()].begin();
+		  while (amount > 0)
+		    {
+		      amount--;
+		      build++;
+		    }
+
+		  //Build it!
+		  source->build((*build), buildRules);
+		  continue;
+		}
 
 	      //Get the number of ships from the source
 	      std::vector<int> ships = source->shipcount();

@@ -31,7 +31,8 @@ struct GalconAISettings
   //How much extra attack power is needed before attacking the target planet.
   //High numbers will make the AI very conservative, while with low numbers
   //attacks will often fail the first time around.
-  float attackExtra;
+  float attackExtraNeutral;
+  float attackExtraEnemy;
 
   //When attacking, this percentage of ships will leave from each planet
   //High numbers expose attacking planets to counterattack, while low
@@ -41,6 +42,17 @@ struct GalconAISettings
   //The delay (ms) between AI calculations when using update().
   //High numbers will improve frame rate, but make the AI less responsive
   int delay;
+
+  //The maximum fraction of the total build rate that can be allocated to
+  //the construction of buildings
+  //High numbers will mean the AI builds a lot of buildings, while low numbers
+  //mean the AI will almost never build buildings
+  float maximumBuildingFraction;
+
+  //The minumum defense a planet needs in order to construct a building.
+  //High numbers mean that the AI will build only when it feels safe,
+  //while low numbers allow for rapid, but risky, growth.
+  float minimumDefenseForBuilding;
 };
 
 class GalconAI
@@ -63,7 +75,8 @@ class GalconAI
   commandList rebalance(const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats);
   void computeTarget(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats);
   commandList attack(const std::vector<std::pair<float, float> > & shipStats);
-  commandList update(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats);
+  commandList build(const std::vector<std::list<Building*> > buildRules, const std::vector<std::pair<float, float> > & shipStats);
+  commandList update(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats, std::vector<std::list<Building*> > buildRules);
 
   //Notifiers
   void notifyConstruction(float attack, float defense);
@@ -71,6 +84,7 @@ class GalconAI
   void notifyAttackLoss(float amount);
   void notifyPlanetLoss(Planet* loss);
   void notifyPlanetGain(Planet* gain);
+  void notifyFleetDamage(float amount);
   
  private:
   //The player who this AI is controlling

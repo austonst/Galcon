@@ -13,6 +13,7 @@
 #include "ai.h"
 #include <map>
 #include <vector>
+#include <sstream>
 
 #include <iostream>
 
@@ -223,8 +224,8 @@ void GalconAI::computeTarget(std::list<Planet> & planets, const std::list<Fleet>
 	    }
 	}
 
-      //We want the distance weighting to follow a log scale
-      //closestDist = log(closestDist);
+      //We want the distance weighting to grow exponentially
+      closestDist = closestDist*closestDist;
 
       //Add it to the map
       distWeight[&(*i)] = closestDist;
@@ -261,6 +262,9 @@ void GalconAI::computeTarget(std::list<Planet> & planets, const std::list<Fleet>
 	    {
 	      //Subtract the attack of the fleet
 	      defense -= k->totalAttack(shipStats);
+
+	      //If the attacker would win, its ships take defense
+	      if (defense < 0) defense *= -1;
 	    }
 	  //We don't care about our own fleets
 	}
@@ -303,7 +307,16 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
   if (target_ == NULL) return ret;
   
   //Compare attack reserves to the defense of the target
-  float attack = defense * (1+set_.attackExtra);
+  float attack;
+  if (target_->owner() == 0)
+    {
+      attack = defense * (1+set_.attackExtraNeutral);
+    }
+  else
+    {
+      attack = defense * (1+set_.attackExtraEnemy);
+    }
+  
   std::cout << "Attackers: " << attTotal_ << " Defenders: " << attack << std::endl;
   if (attTotal_ < attack) return ret;
 
@@ -341,6 +354,12 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
       //Find total attack potential
       float planetAttack = nearestPlanet->totalAttack(shipStats);
 
+      //Send only the required amount
+      if (currentTotal + planetAttack > attack)
+	{
+	  planetAttack -= currentTotal + planetAttack - attack;
+	}
+
       //Don't send them all
       //planetAttack *= set_.perPlanetAttackStrength;
 
@@ -371,10 +390,147 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
   return ret;
 }
 
-//An easy to use, do-everything-in-one-call sort of function
-commandList GalconAI::update(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats)
+//Starts construction of a building if the AI thinks the time is right
+//Returns a comandList sending ships from a planet to itself, with the number
+//of ships being the index of the requested building in buildRules
+commandList GalconAI::build(const std::vector<std::list<Building*> > buildRules, const std::vector<std::pair<float, float> > & shipStats)
 {
-  std::cout << "Update) Attack: " << attTotal_ << " Defense: " << defTotal_ << std::endl;
+  std::cout << "Build) ";
+  //Find the total build rate of the AI's planets
+  float totalBuildRate = 0;
+  float currentBuildRate = 0;
+  for (planetPtrIter i = planets_.begin(); i != planets_.end(); i++)
+    {
+      //To get a sense of the general build rate, sum attack and defense incomes
+      std::vector<float> rates = (*i)->shiprate();
+      for (unsigned int j = 0; j < rates.size(); j++)
+	{
+	  totalBuildRate += rates[j] *
+	    (shipStats[j].first + shipStats[j].second) *
+	    (*i)->size();
+
+	  //If it is currently working on a building, add to currentBuildRate
+	  if ((*i)->buildIndex() != -1)
+	    {
+	      currentBuildRate += rates[j] *
+		(shipStats[j].first + shipStats[j].second) *
+		(*i)->size();
+	    }
+	}
+
+      //Also include production from buildings
+      for (unsigned int j = 0; j < (*i)->buildcount(); j++)
+	{
+	  //Get the BuildingInstance
+	  BuildingInstance* build = (*i)->building(j);
+
+	  //Make sure it's currently operational
+	  if (!build->exists() || int(j) == (*i)->buildIndex()) continue;
+
+	  //Parse it
+	  std::stringstream ss(build->effect());
+	  std::string item;
+	  std::vector<std::string> tokens;
+	  while (std::getline(ss, item, ' '))
+	    {
+	      tokens.push_back(item);
+	    }
+
+	  //Only handle buildings that build ships
+	  if (tokens[0] == "build")
+	    {
+	      //Must have a size of 3
+	      if (tokens.size() == 3)
+		{
+		  //Add this building's production to the total
+		  int index = atoi(tokens[1].c_str());
+		  totalBuildRate += (1/atoi(tokens[2].c_str())) *
+		    (shipStats[index].first + shipStats[index].second);
+		}
+	    }
+	}
+    }
+
+  //Now find the total production that can be sacrificed for building construction
+  float maxBuildCost = totalBuildRate * set_.maximumBuildingFraction;
+  std::cout << "Total Production: " << totalBuildRate << " Max for Buildings: " << maxBuildCost << std::endl;
+
+  //Build as much as possible
+  commandList ret;
+  std::list<Planet*> commanded;
+  while (currentBuildRate < maxBuildCost)
+    {
+      //Build on the larget planet that still fits within the limit
+      Planet* largestPlanet = NULL;
+      float largestRate = -1;
+
+      for (planetPtrIter i = planets_.begin(); i != planets_.end(); i++)
+	{
+	  //Cannot select planets that are already building, full, or do
+	  //not meet the minimum defense requirement
+	  if ((*i)->buildIndex() != -1) continue;
+	  if ((*i)->totalDefense(shipStats) < set_.minimumDefenseForBuilding) continue;
+	  bool getout = false;
+	  for (planetPtrIter j = commanded.begin(); j != commanded.end(); j++)
+	    {
+	      if ((*j) == (*i))
+		{
+		  getout = true;
+		  break;
+		}
+	    }
+	  if (getout) continue;
+	  getout = true;
+	  for (unsigned int j = 0; j < (*i)->buildcount(); j++)
+	    {
+	      if (!(*i)->building(j)->exists())
+		{
+		  getout = false;
+		  break;
+		}
+	    }
+	  if (getout) continue;
+	  
+	  //Find this planet's inherent build rate
+	  std::vector<float> rates = (*i)->shiprate();
+	  float planetBuildRate = 0;
+	  for (unsigned int j = 0; j < rates.size(); j++)
+	    {
+	      planetBuildRate += rates[j] * (shipStats[j].first + shipStats[j].second);
+	    }
+
+	  //Scale by size
+	  planetBuildRate *= (*i)->size();
+
+	  //Compare it to the current best and the upper limit
+	  if ((planetBuildRate > largestRate || largestPlanet == NULL) && planetBuildRate + currentBuildRate < maxBuildCost)
+	    {
+	      std::cout << "  Planet " << (*i) << " has rate " << planetBuildRate << std::endl;
+	      largestPlanet = (*i);
+	      largestRate = planetBuildRate;
+	    }
+	}
+
+      //If it's NULL, no planets are cheap enough
+      if (largestPlanet == NULL) break;
+
+      //Build something on this planet
+      //For now, naievely pick the first option
+      std::cout << "  Building something on " << largestPlanet << std::endl;
+      commanded.push_back(largestPlanet);
+      ret.push_back(std::make_pair(largestPlanet, std::make_pair(0, largestPlanet)));
+
+      //Add the rate to the current build rate
+      currentBuildRate += largestRate;
+    }
+
+  //Send the commands!
+  return ret;
+}
+  
+//An easy to use, do-everything-in-one-call sort of function
+commandList GalconAI::update(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats, std::vector<std::list<Building*> > buildRules)
+{
   //Set up the list of commands
   commandList rb;
   
@@ -382,16 +538,22 @@ commandList GalconAI::update(std::list<Planet> & planets, const std::list<Fleet>
   int time = SDL_GetTicks();
   if ((time - updateTime_ < set_.delay && updateTime_ != -1) || !active_) return rb;
   updateTime_ = time;
-  
+  std::cout << "Update) Attack: " << attTotal_ << " Defense: " << defTotal_ << std::endl;
+
   //Compute the best target
   computeTarget(planets, fleets, shipStats);
 
-  //Get the commands from rebalancing and attacking
+  //Get the commands from rebalancing, attacking, and building
   rb = rebalance(fleets, shipStats);
   commandList at = attack(shipStats);
+  commandList bd = build(buildRules, shipStats);
 
   //Append at to rb
   for (commandList::iterator i = at.begin(); i != at.end(); i++)
+    {
+      rb.push_back(*i);
+    }
+  for (commandList::iterator i = bd.begin(); i != bd.end(); i++)
     {
       rb.push_back(*i);
     }
@@ -450,6 +612,13 @@ void GalconAI::notifyPlanetGain(Planet* gain)
 	}
     }
   planets_.push_back(gain);
+}
+
+//Notify the AI that its fleet has taken damage
+void GalconAI::notifyFleetDamage(float amount)
+{
+  defTotal_ -= amount;
+  if (defTotal_ < 0) defTotal_ = 0;
 }
   
 #endif
