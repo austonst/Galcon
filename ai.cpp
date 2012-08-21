@@ -518,10 +518,18 @@ commandList GalconAI::build(const std::vector<std::list<Building*> > buildRules,
       if (largestPlanet == NULL) break;
 
       //Build something on this planet
-      //For now, naievely pick the first option
-      std::cout << "  Building something on " << largestPlanet << std::endl;
+      //For now, naievely pick at random      
+      int numBuildTypes = 0;
+      for (std::list<Building*>::const_iterator bi = buildRules[largestPlanet->type()].begin(); bi != buildRules[largestPlanet->type()].end(); bi++)
+	{
+	  numBuildTypes++;
+	}
+      int buildType = rand()%numBuildTypes;
+
+      //Add the command
+      ret.push_back(std::make_pair(largestPlanet, std::make_pair(buildType, largestPlanet)));
+      std::cout << "  Constructing building " << buildType << " on " << largestPlanet << std::endl;
       commanded.push_back(largestPlanet);
-      ret.push_back(std::make_pair(largestPlanet, std::make_pair(0, largestPlanet)));
 
       //Add the rate to the current build rate
       currentBuildRate += largestRate;

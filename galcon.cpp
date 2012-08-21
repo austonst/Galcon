@@ -119,19 +119,19 @@ int main(int argc, char* argv[])
       shipStats[i].second = i+1;
     }
 
-  //Set up buildings
+  //Set up buildings and building rules
   std::list<Building> buildings;
   std::vector<std::list<Building*> > buildRules;
   buildRules.resize(2);
   SDL_Surface* buildimg = loadImage("building.png");
   SDL_Surface* buildconstimg = loadImage("buildingconstruct.png");
-  buildings.push_back(Building(buildimg, buildconstimg, "build 1 5"));
+  buildings.push_back(Building(buildimg, buildconstimg, "build 0 6"));
   buildings.push_back(Building(buildimg, buildconstimg, "fire damage 2 1"));
   std::list<Building>::iterator bi = buildings.begin();
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(10000);
   bi++;
-  buildRules[1].push_back(&(*bi));
+  buildRules[0].push_back(&(*bi));
   bi->setBuildTime(10000);
   bi->setRange(250);
   SDL_FreeSurface(buildimg);
@@ -184,14 +184,14 @@ int main(int argc, char* argv[])
   std::vector<int> homestart;
   homestart.resize(1,3);
   planets.push_back(Planet(planetimg, 1.0,
-			   Vec2f(rand()%100, 100 + rand()%(LEVEL_HEIGHT-200)), 1));
+			   Vec2f(rand()%100, 100 + rand()%(LEVEL_HEIGHT-200)), 0));
   planets.back().setOwner(1, indicator);
   planets.back().setShipRate(0, ship0rate);
   planets.back().setRotSpeed(M_PI/20);
   planets.back().addShips(homestart);
   planets.push_back(Planet(planetimg, 1.0,
 			   Vec2f(LEVEL_WIDTH-(2*UNSCALED_PLANET_RADIUS)-(rand()%100),
-				 100 + rand()%(LEVEL_HEIGHT-200)), 1));
+				 100 + rand()%(LEVEL_HEIGHT-200)), 0));
   planets.back().setOwner(2, indicator);
   planets.back().setShipRate(0, ship0rate);
   planets.back().setRotSpeed(M_PI/20);
@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
       float psize = (double(rand())/double(RAND_MAX))*0.7 + 0.5;
       Planet p(planetimg, psize,
 	       Vec2f(rand()%(LEVEL_WIDTH-int(2*UNSCALED_PLANET_RADIUS*psize)),
-		     rand()%(LEVEL_HEIGHT-int(2*UNSCALED_PLANET_RADIUS*psize))), 1);
+		     rand()%(LEVEL_HEIGHT-int(2*UNSCALED_PLANET_RADIUS*psize))), 0);
 
       //Make sure it doesn't collide with any other planets
       bool skip = false;
@@ -265,10 +265,10 @@ int main(int argc, char* argv[])
 
   //For now, AI controls player 2
   GalconAISettings aiSet;
-  aiSet.attackFraction = .8;
+  aiSet.attackFraction = .5;
   aiSet.surplusDefecitThreshold = .25;
   aiSet.attackExtraNeutral = .3;
-  aiSet.attackExtraEnemy = .6;
+  aiSet.attackExtraEnemy = .7;
   aiSet.perPlanetAttackStrength = .5;
   aiSet.delay = 200;
   aiSet.maximumBuildingFraction = .3;
