@@ -123,10 +123,12 @@ int main(int argc, char* argv[])
   std::list<Building> buildings;
   std::vector<std::list<Building*> > buildRules;
   buildRules.resize(2);
-  SDL_Surface* buildimg = loadImage("building.png");
-  SDL_Surface* buildconstimg = loadImage("buildingconstruct.png");
-  buildings.push_back(Building(buildimg, buildconstimg, "build 0 6"));
-  buildings.push_back(Building(buildimg, buildconstimg, "fire damage 2 1"));
+  SDL_Surface* b01 = loadImage("b01.png");
+  SDL_Surface* bc01 = loadImage("bc01.png");
+  SDL_Surface* b02 = loadImage("b02.png");
+  SDL_Surface* bc02 = loadImage("bc02.png");
+  buildings.push_back(Building(b01, bc01, "build 0 6"));
+  buildings.push_back(Building(b02, bc02, "fire damage 2 1"));
   std::list<Building>::iterator bi = buildings.begin();
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(10000);
@@ -134,8 +136,10 @@ int main(int argc, char* argv[])
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(10000);
   bi->setRange(250);
-  SDL_FreeSurface(buildimg);
-  SDL_FreeSurface(buildconstimg);
+  SDL_FreeSurface(b01);
+  SDL_FreeSurface(bc01);
+  SDL_FreeSurface(b02);
+  SDL_FreeSurface(bc02);
 
   //Create a list of planets
   std::list<Planet> planets;
