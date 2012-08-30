@@ -14,6 +14,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include <cmath>
 
 #include <iostream>
 
@@ -225,7 +226,7 @@ void GalconAI::computeTarget(std::list<Planet> & planets, const std::list<Fleet>
 	}
 
       //We want the distance weighting to grow exponentially
-      closestDist = closestDist*closestDist;
+      closestDist = pow(closestDist, set_.distancePower);
 
       //Add it to the map
       distWeight[&(*i)] = closestDist;

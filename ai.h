@@ -53,6 +53,11 @@ struct GalconAISettings
   //High numbers mean that the AI will build only when it feels safe,
   //while low numbers allow for rapid, but risky, growth.
   float minimumDefenseForBuilding;
+
+  //The power to which the distance to other planets is raised
+  //High numbers will make the AI prefer colonizing only close planets
+  //Low numbers will make the AI more willing to go far for a good planet
+  float distancePower;
 };
 
 class GalconAI
