@@ -26,6 +26,7 @@ const int SCREEN_HEIGHT = 600;
 const int LEVEL_WIDTH = 800;
 const int LEVEL_HEIGHT = 600;
 const int CAMERA_SPEED = 200;
+const int FPS_CAP = 60;
 
 SDL_Surface* loadImage(std::string filename)
 {
@@ -295,7 +296,10 @@ int main(int argc, char* argv[])
   while (quit == 0)
     {
       //Update time and dt
+      //Cap FPS
       int dt = SDL_GetTicks() - time;
+      float minms = 1000.0/float(FPS_CAP);
+      if (dt < minms) SDL_Delay(minms-dt);
       time = SDL_GetTicks();
 
       //Update keystates
