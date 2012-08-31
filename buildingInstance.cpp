@@ -35,8 +35,14 @@ void BuildingInstance::update()
   int dt = currentTime - time_;
   time_ = currentTime;
 
-  //Update projectileTime_
-  projectileTime_ += dt;
+  //Update projectileTime_ if the building exists
+  if (type_ != NULL)
+    {
+      projectileTime_ += dt;
+
+      //Do not allow projectileTime to store up extra shots
+      if (projectileTime_ > type_->cd()) projectileTime_ = type_->cd();
+    }
 }
 
 //Destroys the building

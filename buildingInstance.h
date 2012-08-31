@@ -34,7 +34,7 @@ class BuildingInstance
   int buildtime() const {return type_->buildtime();}
   float cd() const {return type_->cd();}
   int range() const {return type_->range();}
-  bool canFire() const {return projectileTime_ > type_->cd();}
+  bool canFire() const {return projectileTime_ >= type_->cd();}
 
   //Regular use functions
   //BuildingInstance
