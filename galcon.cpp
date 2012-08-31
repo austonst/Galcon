@@ -477,6 +477,10 @@ int main(int argc, char* argv[])
 		  //Actually do the attack
 		  (*((*i).dest())).takeAttack((*i).ships(), (*i).owner(), shipStats, indicator);
 
+		  //If the attack changed ownership of the selected planet,
+		  //deselect it
+		  if (oldowner != i->dest()->owner() && i->dest() == &(*selectPlanet)) selectPlanet = planNull;
+
 		  //Get ship counts after the attack
 		  std::vector<int> ships2 = i->dest()->shipcount();
 
