@@ -269,12 +269,21 @@ void GalconAI::computeTarget(std::list<Planet> & planets, const std::list<Fleet>
 	    }
 	  //We don't care about our own fleets
 	}
+
+      //Add any ships that would be created during the flight
+      //Ignore construction from buildings for now...
+      float travelTime = pow(distWeight[&(*i)], 1.0/set_.distancePower)/float(DEFAULT_FLEET_SPEED);
+      defense += travelTime * i->size();
+
       
       //Compute ratio
-      float ratio = defense / i->size();
+      float ratio = (defense+3) / i->size();
 
       //Weight it by distance
       ratio *= distWeight[&(*i)] / maximin;
+
+      //Weight it by size (prioritizing small)
+      ratio *= i->size();
 
       //Compare it
       if (ratio < bestRatio || bestPlanet == NULL)
@@ -306,6 +315,9 @@ commandList GalconAI::attack(const std::vector<std::pair<float, float> > & shipS
 
   //Ensure at least one ship is sent each attack
   if (defense < 1) defense = 1;
+
+  //Add one to the defense to help with attacking small planets
+  defense++;
 
   //If there is no target planet, we cannot attack
   if (target_ == NULL) return ret;
@@ -585,10 +597,21 @@ void GalconAI::notifyConstruction(float attack, float defense)
 void GalconAI::notifyDefendLoss(float attack)
 {
   std::cout << "DefendLoss) " << attack << " total" << std::endl;
+  if (defTotal_ >= attack)
+    {
+      defTotal_ -= attack;
+    }
+  else
+    {
+      attTotal_ -= attack - defTotal_;
+      defTotal_ = 0;
+      if (attTotal_ < 0) attTotal_ = 0;
+    }
+  /*
   attTotal_ -= attack * set_.attackFraction;
   defTotal_ -= attack * (1-set_.attackFraction);
   if (attTotal_ < 0) attTotal_ = 0;
-  if (defTotal_ < 0) defTotal_ = 0;
+  if (defTotal_ < 0) defTotal_ = 0;*/
 }
 
 //Notify the AI that it has lost ships while attacking another planet

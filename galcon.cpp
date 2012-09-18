@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
 
   //For now, AI controls player 2
   GalconAISettings aiSet;
-  aiSet.attackFraction = .7;
+  aiSet.attackFraction = .8;
   aiSet.surplusDefecitThreshold = .25;
   aiSet.attackExtraNeutral = .2;
   aiSet.attackExtraEnemy = .7;
@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
   aiSet.delay = 200;
   aiSet.maximumBuildingFraction = .3;
   aiSet.minimumDefenseForBuilding = 10;
-  aiSet.distancePower = 1.4;
+  aiSet.distancePower = 1.2;
   ai.push_back(GalconAI(2, aiSet));
   ai.begin()->init(planets, shipStats);
   ai.begin()->activate();
