@@ -26,7 +26,7 @@ class Fleet
  public:
   //Constructors
   Fleet();
-  Fleet(int inships, int intype, Planet* begin, Planet* end);
+  Fleet(int inships, int intype, ShipStats shipstats, Planet* begin, Planet* end);
 
   //Accessors
   Vec2f pos() const {return pos_;}

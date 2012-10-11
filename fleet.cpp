@@ -19,11 +19,11 @@ Fleet::Fleet():pos_(0,0), dest_(NULL), speed_(0), lastTicks_(0), owner_(0)
 }
 
 //Regular constructor
-Fleet::Fleet(int inships, int intype, Planet* begin, Planet* end):
+Fleet::Fleet(int inships, int intype, ShipStats shipstats, Planet* begin, Planet* end):
   pos_(begin->x() + (UNSCALED_PLANET_RADIUS * begin->size()), 
        begin->y() + (UNSCALED_PLANET_RADIUS * begin->size())),
   dest_(end),
-  speed_(DEFAULT_FLEET_SPEED),
+  speed_(shipstats.speed),
   ships_(inships),
   type_(intype),
   lastTicks_(0),

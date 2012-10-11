@@ -118,7 +118,13 @@ int main(int argc, char* argv[])
     {
       shipstats[i].attack = i+1;
       shipstats[i].defense = i+1;
+      shipstats[i].speed = DEFAULT_FLEET_SPEED;
     }
+
+  //Set up ship type 1: Heavy ship
+  shipstats[1].attack = 3;
+  shipstats[1].defense = 2;
+  shipstats[1].speed = DEFAULT_FLEET_SPEED/2;
 
   //Set up buildings and building rules
   std::list<Building> buildings;
@@ -130,6 +136,7 @@ int main(int argc, char* argv[])
   SDL_Surface* bc02 = loadImage("bc02.png");
   buildings.push_back(Building(b01, bc01, "build 0 6"));
   buildings.push_back(Building(b02, bc02, "fire damage 2 1"));
+  buildings.push_back(Building(b01, bc01, "build 1 12"));
   std::list<Building>::iterator bi = buildings.begin();
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(10000);
@@ -137,6 +144,9 @@ int main(int argc, char* argv[])
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(10000);
   bi->setRange(250);
+  bi++;
+  buildRules[0].push_back(&(*bi));
+  bi->setBuildTime(10000);
   SDL_FreeSurface(b01);
   SDL_FreeSurface(bc01);
   SDL_FreeSurface(b02);
@@ -362,7 +372,7 @@ int main(int argc, char* argv[])
 		    {
 		      if (selectPlanet->owner() == localPlayer)
 			{
-			  selectPlanet->build(&(*(buildings.begin())),buildRules);
+			  selectPlanet->build(&(*(buildings.begin())), buildRules);
 			}
 		    }
 		  break;
@@ -371,7 +381,18 @@ int main(int argc, char* argv[])
 		    {
 		      if (selectPlanet->owner() == localPlayer)
 			{
-			  selectPlanet->build(&(*(++buildings.begin())),buildRules);
+			  selectPlanet->build(&(*(++buildings.begin())), buildRules);
+			}
+		    }
+		  break;
+		case SDLK_e:
+		  if (selectPlanet != planNull)
+		    {
+		      if (selectPlanet->owner() == localPlayer)
+			{
+			  std::list<Building>::iterator i = buildings.begin();
+			  i++; i++;
+			  selectPlanet->build(&(*i), buildRules);
 			}
 		    }
 		  break;
@@ -452,7 +473,7 @@ int main(int argc, char* argv[])
 			      if (transfer > 0)
 				{
 				  //Add the new fleet
-				  fleets.push_back(Fleet(transfer, shipSendType, &(*selectPlanet), &(*i)));
+				  fleets.push_back(Fleet(transfer, shipSendType, shipstats[shipSendType], &(*selectPlanet), &(*i)));
 				  break;
 				}
 			    }
@@ -825,7 +846,7 @@ int main(int argc, char* argv[])
 	      //Fleet is built, send each type
 	      for (unsigned int k = 0; k < newfleet.size(); k++)
 		{
-		  fleets.push_back(Fleet(newfleet[k], k, source, dest));
+		  fleets.push_back(Fleet(newfleet[k], k, shipstats[k], source, dest));
 
 		  //Also subtract the fleet from the original planet
 		  newfleet[k] *= -1;
