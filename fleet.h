@@ -25,13 +25,14 @@ class Fleet
  public:
   //Constructors
   Fleet();
-  Fleet(const std::vector<int>& inships, Planet* begin, Planet* end);
+  Fleet(int inships, int intype, Planet* begin, Planet* end);
 
   //Accessors
   Vec2f pos() const {return pos_;}
   double x() const {return pos_.x();}
   double y() const {return pos_.y();}
-  std::vector<int> ships() const {return ships_;}
+  int ships() const {return ships_;}
+  int type() const {return type_;}
   Planet* dest() const {return dest_;}
   int owner() const {return owner_;}
   float totalAttack(const std::vector<std::pair<float, float> >& shipstats) const;
@@ -53,7 +54,10 @@ class Fleet
   int speed_;
 
   //The count of ships
-  std::vector<int> ships_;
+  int ships_;
+
+  //The type of ship
+  int type_;
 
   //The ticks at the last time update was called
   int lastTicks_;
@@ -63,7 +67,6 @@ class Fleet
 
   //Variables to keep track of accumulated, yet unapplied, damage
   int damage_;
-  int damageTarget_;
 };
 
 typedef std::list<Fleet>::iterator fleetIter;

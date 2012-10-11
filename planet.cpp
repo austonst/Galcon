@@ -328,80 +328,52 @@ void Planet::destroy(int index)
 }
 
 //Adds the given ships to the planet
-void Planet::addShips(const std::vector<int>& inships)
+void Planet::addShips(int inships, int type)
 {
-  //Copy them over
-  for (unsigned int i = 0; i < inships.size(); i++)
-    {
-      ship_[i].first += inships[i];
-    }
+  ship_[type].first += inships;
 }
 
-//Splits ratio% of ships off from the planet, returning them as a vector of floats
-std::vector<int> Planet::splitShips(float ratio)
+//Splits ratio% of ships off from the planet, returning them as an integer
+int Planet::splitShips(float ratio, int type)
 {
-  //Make the vector
-  std::vector<int> outships(ship_.size());
-
-  //Find correct values
-  for (unsigned int i = 0; i < ship_.size(); i++)
+  //Must be at least 1
+  if (ship_[type].first > 0.999)
     {
-      //Must be at least 1
-      if (ship_[i].first > 0.999)
-	{
-	  //Round up
-	  outships[i] = int((ship_[i].first * ratio) + .5);
-	  
-	  ship_[i].first -= outships[i];
-	}
-      else {outships[i] = 0;}
+      //Round up
+      int ret = int((ship_[type].first * ratio) + .5);
+      ship_[type].first -= ret;
+      return ret;
     }
-
-  //Return
-  return outships;
+  else {return 0;}
 }
 
 //Resolves an attack on the planet given the attacking fleet, the player, and ship stats
-void Planet::takeAttack(const std::vector<int>& inships, int player, const std::vector<std::pair<float, float> >& shipstats, SDL_Surface* indicator[])
+void Planet::takeAttack(int inships, int type, int player, const std::vector<std::pair<float, float> >& shipstats, SDL_Surface* indicator[])
 {
-  //Create some new vectors for sorting
-  std::vector<std::pair<int, std::pair<int, int> > > attack(ship_.size());
+  //Create a new vectors for sorting defenders
   std::vector<std::pair<int, std::pair<int, int> > > defense(ship_.size());
 
-  //First is attack/defense
+  //First is defense
   //Second.first is ship count
   //Second.second is orginal index
-  for (unsigned int i = 0; i < shipstats.size(); i++)
+  for (unsigned int i = 0; i < ship_.size(); i++)
     {
-      attack[i] = std::make_pair(shipstats[i].first, std::make_pair(inships[i], i));
       defense[i] = std::make_pair(shipstats[i].second, std::make_pair(ship_[i].first, i));
     }
 
-  //Sort 'em
-  std::sort(attack.begin(), attack.end(),
-	    [](std::pair<int, std::pair<int, int> > arg1, std::pair<int, std::pair<int, int> > arg2) -> bool
-	    {
-	      return arg1.first > arg2.first;
-	    });
   std::sort(defense.begin(), defense.end(),
 	    [](std::pair<int, std::pair<int, int> > arg1, std::pair<int, std::pair<int, int> > arg2) -> bool
 	    {
 	      return arg1.first > arg2.first;
 	    });
-
+  
   //Resolve conflict
-  int acount = attack[0].first  * attack[0].second.first;
+  int acount = inships * shipstats[type].first;
   int dcount = defense[0].first * defense[0].second.first;
-  unsigned int a = 0;
   unsigned int d = 0;
-  while (a < ship_.size() && d < ship_.size())
+  while (d < ship_.size())
     {
-      //If either are zero, move down until we can get some more ships
-      while (acount == 0 && a < shipstats.size())
-	{
-	  acount = attack[a].first * attack[a].second.first;
-	  if (acount == 0) a++;
-	}
+      //If d is zero, move down until we can get some more ships
       while (dcount == 0 && d < shipstats.size())
 	{
 	  dcount = defense[d].first * defense[d].second.first;
@@ -409,10 +381,9 @@ void Planet::takeAttack(const std::vector<int>& inships, int player, const std::
 	}
 
       //Run a check to ensure no bounds are passed
-      if (a == shipstats.size()) break;
       if (d == shipstats.size()) break;
       
-	  
+      
       //If attacker is currently more powerful
       if (acount > dcount)
 	{
@@ -421,7 +392,7 @@ void Planet::takeAttack(const std::vector<int>& inships, int player, const std::
 	  dcount = 0;
 
 	  //Adjust ship counts
-	  attack[a].second.first = acount/attack[a].first;
+	  inships = acount/shipstats[type].first;
 	  defense[d].second.first = 0;
 
 	  //Move to next defender
@@ -434,32 +405,26 @@ void Planet::takeAttack(const std::vector<int>& inships, int player, const std::
 	  acount = 0;
 
 	  //Adjust ship counts
-	  attack[a].second.first = 0;
+	  inships = 0;
 	  defense[d].second.first = dcount/defense[d].first;
 
-	  //Move to next attacker
-	  a++;
+	  //Fighting's done
+	  break;
 	}
       else //Equal counts of attackers and defenders
 	{
 	  //Decrease both counts to zero
-	  attack[a].second.first  = 0;
+	  inships  = 0;
 	  defense[d].second.first = 0;
 	  acount = 0;
 	  dcount = 0;
 
 	  //Move to next best types
-	  a++;
 	  d++;
 	}
     }
 
   //Add up any extras who "didn't fight"
-  while (a < attack.size())
-    {
-      acount += attack[a].second.first;
-      a++;
-    }
   while (d < defense.size())
     {
       dcount += defense[d].second.first;
@@ -478,17 +443,12 @@ void Planet::takeAttack(const std::vector<int>& inships, int player, const std::
     }
   else if (dcount == 0) //Attacker wins
     {
-      //Copy attacker values to the planet's count
-      for (unsigned int i = 0; i < ship_.size(); i++)
-	{
-	  ship_[attack[i].second.second].first = attack[i].second.first;
-	}
-
+      ship_[type].first = inships;
+      
       //Attacker now owns the planet
       setOwner(player, indicator);
     }
 
-  attack.clear();
   defense.clear();
 }
 

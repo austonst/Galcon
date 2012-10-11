@@ -19,39 +19,29 @@ Fleet::Fleet():pos_(0,0), dest_(NULL), speed_(0), lastTicks_(0), owner_(0)
 }
 
 //Regular constructor
-Fleet::Fleet(const std::vector<int>& inships, Planet* begin, Planet* end):
+Fleet::Fleet(int inships, int intype, Planet* begin, Planet* end):
   pos_(begin->x() + (UNSCALED_PLANET_RADIUS * begin->size()), 
        begin->y() + (UNSCALED_PLANET_RADIUS * begin->size())),
   dest_(end),
   speed_(DEFAULT_FLEET_SPEED),
   ships_(inships),
+  type_(intype),
   lastTicks_(0),
   owner_(begin->owner()),
-  damage_(0),
-  damageTarget_(0)
+  damage_(0)
 {
 }
 
 //Returns the total attack power of the fleet
 float Fleet::totalAttack(const std::vector<std::pair<float, float> >& shipstats) const
 {
-  float att = 0;
-  for (unsigned int i = 0; i < ships_.size(); i++)
-    {
-      att += float(ships_[i]) * shipstats[i].first;
-    }
-  return att;
+  return float(ships_) * shipstats[type_].first;
 }
 
 //Returns the total defense of the fleet
 float Fleet::totalDefense(const std::vector<std::pair<float, float> >& shipstats) const
 {
-  float def = 0;
-  for (unsigned int i = 0; i < ships_.size(); i++)
-    {
-      def += float(ships_[i]) * shipstats[i].second;
-    }
-  return def;
+  return float(ships_) * shipstats[type_].second;
 }
 
 //Update function
@@ -98,42 +88,17 @@ bool Fleet::takeHit(int damage, const std::vector<std::pair<float, float> >& shi
   //Add in any extra damage from last time
   damage += damage_;
 
-  while (damage > 0)
-    {
-      //Find the next ship type in the fleet
-      int start = damageTarget_;
-      damageTarget_ = (damageTarget_+1)%ships_.size();
-      while (ships_[damageTarget_] == 0)
-	{
-	  damageTarget_ = (damageTarget_+1)%ships_.size();
-	  if (ships_[damageTarget_] == 0 && start == damageTarget_)
-	    {
-	      return false;
-	    }
-	}
-      
-      //Destroy one ship of this type, if possible
-      if (damage >= shipstats[damageTarget_].second)
-	{
-	  ships_[damageTarget_]--;
-	  
-	  //There is now less damage to go around
-	  damage -= shipstats[damageTarget_].second;
-	}
-      else //Not enough damage to destroy this ship
-	{
-	  //Store the remaining damage for next time
-	  damage_ = damage;
-	  
-	  //This ship will be the target of the next hit
-	  damageTarget_ = (damageTarget_-1)%ships_.size();
+  //Convert damage to ship loss
+  int shiploss = damage / shipstats[type_].second;
 
-	  //Return true: fleet not destroyed
-	  return true;
-	}
-    }
+  //If we can wipe out the whole fleet
+  if (shiploss >= ships_) return false;
 
-  //I'm not sure why the code would ever get here, but just to be sure...
+  //Otherwise, deal some damage
+  ships_ -= shiploss;
+
+  //Keep track of any extra accumulated damage
+  damage_ = damage % int(shipstats[type_].second);
   return true;
 }
 

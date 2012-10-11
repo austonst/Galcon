@@ -193,14 +193,14 @@ int main(int argc, char* argv[])
   planets.back().setOwner(1, indicator);
   planets.back().setShipRate(0, ship0rate);
   planets.back().setRotSpeed(M_PI/20);
-  planets.back().addShips(homestart);
+  planets.back().addShips(3, 0);
   planets.push_back(Planet(planetimg, 1.0,
 			   Vec2f(LEVEL_WIDTH-(2*UNSCALED_PLANET_RADIUS)-(rand()%100),
 				 100 + rand()%(LEVEL_HEIGHT-200)), 0));
   planets.back().setOwner(2, indicator);
   planets.back().setShipRate(0, ship0rate);
   planets.back().setRotSpeed(M_PI/20);
-  planets.back().addShips(homestart);
+  planets.back().addShips(3, 0);
 
   //Now repeatedly create planets until either a target density is reached
   //or we go too many tries without finding a spot for a new planet.
@@ -285,6 +285,9 @@ int main(int argc, char* argv[])
 
   //The number of the locally playing player
   char localPlayer = 1;
+
+  //The type of ship that will currently be sent
+  int shipSendType = 0;
   
   /*
     -----
@@ -344,8 +347,9 @@ int main(int argc, char* argv[])
 	      quit = 1;
 	    }
 
-	  //Check for escape key and number presses to construct buildings
-	  //BUILDING CONSTRUCTION THIS WAY IS TEMPORARY
+	  //Check for escape key, QWERTY to construct buildings, or numbers to select
+	  //ship type.
+	  //BUILDING CONSTRUCTION AND TYPE SELECTION THIS WAY IS TEMPORARY
 	  if (event.type == SDL_KEYDOWN)
 	    {
 	      switch (event.key.keysym.sym)
@@ -353,7 +357,7 @@ int main(int argc, char* argv[])
 		case SDLK_ESCAPE:
 		  quit = 1;
 		  break;
-		case SDLK_1:
+		case SDLK_q:
 		  if (selectPlanet != planNull)
 		    {
 		      if (selectPlanet->owner() == localPlayer)
@@ -362,7 +366,7 @@ int main(int argc, char* argv[])
 			}
 		    }
 		  break;
-		case SDLK_2:
+		case SDLK_w:
 		  if (selectPlanet != planNull)
 		    {
 		      if (selectPlanet->owner() == localPlayer)
@@ -370,6 +374,21 @@ int main(int argc, char* argv[])
 			  selectPlanet->build(&(*(++buildings.begin())),buildRules);
 			}
 		    }
+		  break;
+		case SDLK_1:
+		  shipSendType = 0;
+		  break;
+		case SDLK_2:
+		  shipSendType = 1;
+		  break;
+		case SDLK_3:
+		  shipSendType = 2;
+		  break;
+		case SDLK_4:
+		  shipSendType = 3;
+		  break;
+		case SDLK_5:
+		  shipSendType = 4;
 		  break;
 		default:
 		  break;
@@ -428,16 +447,13 @@ int main(int argc, char* argv[])
 			  if ((click-center).length() < UNSCALED_PLANET_RADIUS * i->size())
 			    {
 			      //Split ships from the source planet
-			      std::vector<int> transfer = (*selectPlanet).splitShips(0.5);
+			      int transfer = (*selectPlanet).splitShips(0.5, shipSendType);
 			      //Make sure we actually have a ship in the fleet
-			      for (unsigned int j = 0; j < transfer.size(); j++)
+			      if (transfer > 0)
 				{
-				  if (transfer[j] > 0)
-				    {
-				      //Add the new fleet
-				      fleets.push_back(Fleet(transfer, &(*selectPlanet), &(*i)));
-				      break;
-				    }
+				  //Add the new fleet
+				  fleets.push_back(Fleet(transfer, shipSendType, &(*selectPlanet), &(*i)));
+				  break;
 				}
 			    }
 			}
@@ -465,7 +481,7 @@ int main(int argc, char* argv[])
 	      if ((*i).dest()->owner() == (*i).owner())
 		{
 		  //Add the fleet to the new planet
-		  (*((*i).dest())).addShips((*i).ships());
+		  (*((*i).dest())).addShips(i->ships(), i->type());
 		}
 	      else //Hostile
 		{
@@ -475,7 +491,7 @@ int main(int argc, char* argv[])
 		  int oldowner = i->dest()->owner();
 
 		  //Actually do the attack
-		  (*((*i).dest())).takeAttack((*i).ships(), (*i).owner(), shipStats, indicator);
+		  (*((*i).dest())).takeAttack(i->ships(), i->type(), i->owner(), shipStats, indicator);
 
 		  //If the attack changed ownership of the selected planet,
 		  //deselect it
@@ -512,24 +528,21 @@ int main(int argc, char* argv[])
 		  for (std::list<GalconAI>::iterator j = ai.begin(); j != ai.end(); j++)
 		    {
 		      if (i->owner() != j->player()) continue;
-		      float lost = 0;
-		      for (unsigned int k = 0; k < ships1.size(); k++)
+		      float lost;
+		      
+		      //If the attack failed
+		      if (i->dest()->owner() != i->owner())
 			{
-			  int diff;
-			  //If the attack failed
-			  if (i->dest()->owner() != i->owner())
-			    {
-			      //Lost everything
-			      diff = i->ships()[k];
-			    }
-			  else //Successful attack
-			    {
-			      //Lose the difference
-			      diff = i->ships()[k] - ships2[k];
-			      j->notifyPlanetGain(i->dest());
-			    }
-			  lost += diff * shipStats[k].first;
+			  //Lost everything
+			  lost = i->ships();
 			}
+		      else //Successful attack
+			{
+			  //Lose the difference
+			  lost = i->ships() - i->dest()->totalDefense(shipStats);
+			  j->notifyPlanetGain(i->dest());
+			}
+		      
 		      j->notifyAttackLoss(lost);
 		    }
 		}
@@ -761,7 +774,7 @@ int main(int argc, char* argv[])
 	      //Get the number of ships from the source
 	      std::vector<int> ships = source->shipcount();
 
-	      //Start building a fleet
+	      //Send out a fleet for each ship type used
 	      std::vector<int> newfleet;
 	      newfleet.resize(ships.size());
 	      int total = 0;
@@ -809,16 +822,15 @@ int main(int argc, char* argv[])
 		}
 	      if (!sendfleet) continue;
 	      
-	      //Fleet is built, send it
-	      fleets.push_back(Fleet(newfleet, source, dest));
-
-	      //Make sure to subtract the fleet from the original planet
-	      for (unsigned int k = 0; k < ships.size(); k++)
+	      //Fleet is built, send each type
+	      for (unsigned int k = 0; k < newfleet.size(); k++)
 		{
+		  fleets.push_back(Fleet(newfleet[k], k, source, dest));
+
+		  //Also subtract the fleet from the original planet
 		  newfleet[k] *= -1;
+		  source->addShips(newfleet[k], k);
 		}
-	      source->addShips(newfleet);
-	      
 	    }
 	}
 

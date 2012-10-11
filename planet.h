@@ -36,9 +36,9 @@ class Planet
   void build(Building* inbuild);
   void build(Building* inbuild, const std::vector<std::list<Building*> >& rules);
   void destroy(int index);
-  void addShips(const std::vector<int>& inships);
-  std::vector<int> splitShips(float ratio);
-  void takeAttack(const std::vector<int>& inships, int player, const std::vector<std::pair<float, float> >& shipstats, SDL_Surface* indicator[]);
+  void addShips(int inships, int type);
+  int splitShips(float ratio, int type);
+  void takeAttack(int inships, int type, int player, const std::vector<std::pair<float, float> >& shipstats, SDL_Surface* indicator[]);
 
   //Accessors
   SDL_Surface* rotation(float angle = -1);

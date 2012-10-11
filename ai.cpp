@@ -86,17 +86,15 @@ commandList GalconAI::rebalance(const std::list<Fleet> & fleets, const std::vect
 	{
 	  if (j->dest() == *i)
 	    {
-	      std::vector<int> fleetShips = j->ships();
-	      for (unsigned int k = 0; k < fleetShips.size(); k++)
+	      int fleetShips = j->ships();
+	      
+	      if (j->owner() == player_)
 		{
-		  if (j->owner() == player_)
-		    {
-		      def[(*i)] += float(fleetShips[k]) * shipStats[k].first;
-		    }
-		  else
-		    {
-		      def[(*i)] -= float(fleetShips[k]) * shipStats[k].first;
-		    }
+		  def[(*i)] += float(fleetShips) * shipStats[j->type()].first;
+		}
+	      else
+		{
+		  def[(*i)] -= float(fleetShips) * shipStats[j->type()].first;
 		}
 	    }
 	}
