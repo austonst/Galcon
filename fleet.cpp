@@ -33,15 +33,15 @@ Fleet::Fleet(int inships, int intype, Planet* begin, Planet* end):
 }
 
 //Returns the total attack power of the fleet
-float Fleet::totalAttack(const std::vector<std::pair<float, float> >& shipstats) const
+float Fleet::totalAttack(const std::vector<ShipStats> & shipstats) const
 {
-  return float(ships_) * shipstats[type_].first;
+  return float(ships_) * shipstats[type_].attack;
 }
 
 //Returns the total defense of the fleet
-float Fleet::totalDefense(const std::vector<std::pair<float, float> >& shipstats) const
+float Fleet::totalDefense(const std::vector<ShipStats> & shipstats) const
 {
-  return float(ships_) * shipstats[type_].second;
+  return float(ships_) * shipstats[type_].defense;
 }
 
 //Update function
@@ -83,13 +83,13 @@ void Fleet::display(SDL_Surface* screen, const SDL_Rect& camera)
 
 //Applies damage to the fleet
 //Returns false if this hit would destroy the fleet
-bool Fleet::takeHit(int damage, const std::vector<std::pair<float, float> >& shipstats)
+bool Fleet::takeHit(int damage, const std::vector<ShipStats> & shipstats)
 {
   //Add in any extra damage from last time
   damage += damage_;
 
   //Convert damage to ship loss
-  int shiploss = damage / shipstats[type_].second;
+  int shiploss = damage / shipstats[type_].defense;
 
   //If we can wipe out the whole fleet
   if (shiploss >= ships_) return false;
@@ -98,7 +98,7 @@ bool Fleet::takeHit(int damage, const std::vector<std::pair<float, float> >& shi
   ships_ -= shiploss;
 
   //Keep track of any extra accumulated damage
-  damage_ = damage % int(shipstats[type_].second);
+  damage_ = damage % int(shipstats[type_].defense);
   return true;
 }
 

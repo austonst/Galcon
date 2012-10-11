@@ -12,6 +12,7 @@
 #include "SDL/SDL_ttf.h"
 #include "buildingInstance.h"
 #include "vec2f.h"
+#include "shipstats.h"
 #include <vector>
 #include <map>
 #include <list>
@@ -38,7 +39,7 @@ class Planet
   void destroy(int index);
   void addShips(int inships, int type);
   int splitShips(float ratio, int type);
-  void takeAttack(int inships, int type, int player, const std::vector<std::pair<float, float> >& shipstats, SDL_Surface* indicator[]);
+  void takeAttack(int inships, int type, int player, const std::vector<ShipStats>& shipstats, SDL_Surface* indicator[]);
 
   //Accessors
   SDL_Surface* rotation(float angle = -1);
@@ -57,8 +58,8 @@ class Planet
   Vec2f buildcoords(int i);
   int owner() const {return owner_;}
   int buildIndex() const {return buildIndex_;}
-  float totalAttack(const std::vector<std::pair<float, float> >& shipstats) const;
-  float totalDefense(const std::vector<std::pair<float, float> >& shipstats) const;
+  float totalAttack(const std::vector<ShipStats>& shipstats) const;
+  float totalDefense(const std::vector<ShipStats>& shipstats) const;
 
   //Mutators
   void setImage(SDL_Surface* insurf) {rotation_ = RotationCache(insurf, NUM_PLANET_ROTATIONS);}

@@ -17,6 +17,7 @@
 #include <vector>
 #include "vec2f.h"
 #include "planet.h"
+#include "shipstats.h"
 
 const int DEFAULT_FLEET_SPEED = 60;
 
@@ -35,13 +36,13 @@ class Fleet
   int type() const {return type_;}
   Planet* dest() const {return dest_;}
   int owner() const {return owner_;}
-  float totalAttack(const std::vector<std::pair<float, float> >& shipstats) const;
-  float totalDefense(const std::vector<std::pair<float, float> >& shipstats) const;
+  float totalAttack(const std::vector<ShipStats> & shipstats) const;
+  float totalDefense(const std::vector<ShipStats> & shipstats) const;
 
   //General use functions
   void update();
   void display(SDL_Surface* screen, const SDL_Rect& camera);
-  bool takeHit(int damage, const std::vector<std::pair<float, float> >& shipstats);
+  bool takeHit(int damage, const std::vector<ShipStats> & shipstats);
   
  private:
   //Current coordinates of the fleet

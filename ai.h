@@ -76,12 +76,12 @@ class GalconAI
   void setPlayer(char playerid) {player_ = playerid;}
 
   //General use functions
-  void init(std::list<Planet> & planets, const std::vector<std::pair<float, float> > & shipStats);
-  commandList rebalance(const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats);
-  void computeTarget(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats);
-  commandList attack(const std::vector<std::pair<float, float> > & shipStats);
-  commandList build(const std::vector<std::list<Building*> > buildRules, const std::vector<std::pair<float, float> > & shipStats);
-  commandList update(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<std::pair<float, float> > & shipStats, std::vector<std::list<Building*> > buildRules);
+  void init(std::list<Planet> & planets, const std::vector<ShipStats> & shipstats);
+  commandList rebalance(const std::list<Fleet> & fleets, const std::vector<ShipStats> & shipstats);
+  void computeTarget(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<ShipStats> & shipstats);
+  commandList attack(const std::vector<ShipStats> & shipstats);
+  commandList build(const std::vector<std::list<Building*> > buildRules, const std::vector<ShipStats> & shipstats);
+  commandList update(std::list<Planet> & planets, const std::list<Fleet> & fleets, const std::vector<ShipStats> & shipstats, std::vector<std::list<Building*> > buildRules);
 
   //Notifiers
   void notifyConstruction(float attack, float defense);

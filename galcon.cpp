@@ -113,11 +113,11 @@ int main(int argc, char* argv[])
   */
 
   //Set up ship stats
-  std::vector<std::pair<float, float> > shipStats(10);
+  std::vector<ShipStats> shipstats(10);
   for (int i = 0; i < 10; i++)
     {
-      shipStats[i].first = i+1;
-      shipStats[i].second = i+1;
+      shipstats[i].attack = i+1;
+      shipstats[i].defense = i+1;
     }
 
   //Set up buildings and building rules
@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
   aiSet.minimumDefenseForBuilding = 10;
   aiSet.distancePower = 1.2;
   ai.push_back(GalconAI(2, aiSet));
-  ai.begin()->init(planets, shipStats);
+  ai.begin()->init(planets, shipstats);
   ai.begin()->activate();
 
   //The number of the locally playing player
@@ -491,7 +491,7 @@ int main(int argc, char* argv[])
 		  int oldowner = i->dest()->owner();
 
 		  //Actually do the attack
-		  (*((*i).dest())).takeAttack(i->ships(), i->type(), i->owner(), shipStats, indicator);
+		  (*((*i).dest())).takeAttack(i->ships(), i->type(), i->owner(), shipstats, indicator);
 
 		  //If the attack changed ownership of the selected planet,
 		  //deselect it
@@ -519,7 +519,7 @@ int main(int argc, char* argv[])
 			      diff = ships1[k] - ships2[k];
 			    }
 			  
-			  newdefense += diff * shipStats[k].second;
+			  newdefense += diff * shipstats[k].defense;
 			}
 		      j->notifyDefendLoss(newdefense);
 		    }
@@ -539,7 +539,7 @@ int main(int argc, char* argv[])
 		      else //Successful attack
 			{
 			  //Lose the difference
-			  lost = i->ships() - i->dest()->totalDefense(shipStats);
+			  lost = i->ships() - i->dest()->totalDefense(shipstats);
 			  j->notifyPlanetGain(i->dest());
 			}
 		      
@@ -587,8 +587,8 @@ int main(int argc, char* argv[])
 	      for (unsigned int k = 0; k < ships1.size(); k++)
 		{
 		  int diff = ships2[k] - ships1[k];
-		  newattack += diff * shipStats[k].first;
-		  newdefense += diff * shipStats[k].second;
+		  newattack += diff * shipstats[k].attack;
+		  newdefense += diff * shipstats[k].defense;
 		}
 	      j->notifyConstruction(newattack, newdefense);
 	    }
@@ -702,12 +702,12 @@ int main(int argc, char* argv[])
 		    {
 		      if (j->player() == i->target()->owner())
 			{
-			  j->notifyFleetDamage(std::min(std::atof(tokens[1].c_str()), double(i->target()->totalDefense(shipStats))));
+			  j->notifyFleetDamage(std::min(std::atof(tokens[1].c_str()), double(i->target()->totalDefense(shipstats))));
 			}
 		    }
 		  
 		  //Check to see if the fleet is destroyed by this
-		  if (!(i->target()->takeHit(std::atof(tokens[1].c_str()), shipStats)))
+		  if (!(i->target()->takeHit(std::atof(tokens[1].c_str()), shipstats)))
 		    {
 		      //Delete the fleet
 		      for (fleetIter fi = fleets.begin(); fi != fleets.end(); fi++)
@@ -746,7 +746,7 @@ int main(int argc, char* argv[])
       for (std::list<GalconAI>::iterator i = ai.begin(); i != ai.end(); i++)
 	{
 	  //Get the command list
-	  commandList com = i->update(planets, fleets, shipStats, buildRules);
+	  commandList com = i->update(planets, fleets, shipstats, buildRules);
 
 	  //Execute each command
 	  for (commandList::iterator j = com.begin(); j != com.end(); j++)
@@ -785,12 +785,12 @@ int main(int argc, char* argv[])
 		  if (dest->owner() == source->owner())
 		    {
 		      //Check the total defense of this ship type
-		      typeTotal = ships[k] * shipStats[k].second;
+		      typeTotal = ships[k] * shipstats[k].defense;
 		    }
 		  else
 		    {
 		      //Check the total attack of this ship type
-		      typeTotal = ships[k] * shipStats[k].first;
+		      typeTotal = ships[k] * shipstats[k].attack;
 		    }
 		  
 		  //If there's more ships requested than there are of this type
