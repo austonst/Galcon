@@ -830,22 +830,11 @@ int main(int argc, char* argv[])
 		      break;
 		    }
 		}
-
-	      //Refuse to send a fleet with no ships
-	      bool sendfleet = false;
-	      for (unsigned int k = 0; k < newfleet.size(); k++)
-		{
-		  if (newfleet[k] != 0)
-		    {
-		      sendfleet = true;
-		      break;
-		    }
-		}
-	      if (!sendfleet) continue;
 	      
-	      //Fleet is built, send each type
+	      //Fleet is built, send each type that has some ships
 	      for (unsigned int k = 0; k < newfleet.size(); k++)
 		{
+		  if (newfleet[k] == 0) continue;
 		  fleets.push_back(Fleet(newfleet[k], k, shipstats[k], source, dest));
 
 		  //Also subtract the fleet from the original planet
