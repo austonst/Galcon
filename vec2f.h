@@ -51,14 +51,15 @@ class Vec2f
   void normalize() {
     double d = length();
     if (d > 0) scale(1/d); }
-  void scale(double d) {scale(d,d,d);}
-  void scale(double d0, double d1, double d2) {
+  void scale(double d) {scale(d,d);}
+  void scale(double d0, double d1) {
     data[0] *= d0;
-    data[1] *= d1;
-    data[2] *= d2; }
+    data[1] *= d1;}
   void negate() {scale(-1);}
   double dot2(const Vec2f &V) const {
     return data[0]*V.data[0] + data[1]*V.data[1]; }
+  double angleBetween(const Vec2f &V) const {
+    return acos(dot2(V) / (length()*V.length())); }
 
   //Vector math operations
   Vec2f& operator+=(const Vec2f &V) {
