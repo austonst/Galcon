@@ -12,6 +12,7 @@
 #include "projectile.h"
 #include "vec2f.h"
 #include "ai.h"
+#include "lineDrawer.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
 #include "SDL/SDL_ttf.h"
@@ -119,6 +120,9 @@ int main(int argc, char* argv[])
       shipstats[i].attack = i+1;
       shipstats[i].defense = i+1;
       shipstats[i].speed = DEFAULT_FLEET_SPEED;
+      shipstats[i].interceptRange = 200;
+      shipstats[i].interceptDamage = 0.1;
+      shipstats[i].interceptCD = 250;
     }
 
   //Set up ship type 1: Heavy ship
@@ -298,6 +302,9 @@ int main(int argc, char* argv[])
 
   //The type of ship that will currently be sent
   int shipSendType = 0;
+
+  //A line drawer for the main surface
+  lineDrawer linedraw(screen);
   
   /*
     -----
@@ -492,6 +499,7 @@ int main(int argc, char* argv[])
 	{
 	  (*i).update();
 
+	  //Check for arrival at destination
 	  //See if distance from center is less than planet radius
 	  Vec2f tar((*i).dest()->x() + (UNSCALED_PLANET_RADIUS*(*i).dest()->size()),
 		    (*i).dest()->y() + (UNSCALED_PLANET_RADIUS*(*i).dest()->size()));
@@ -582,6 +590,49 @@ int main(int argc, char* argv[])
 	      i = fleets.erase(i);
 	      i--;
 	      continue;
+	    }
+
+	  //Check for interception
+	  //Compare against every other fleet
+	  for (fleetIter j = fleets.begin(); j != fleets.end(); j++)
+	    {
+	      //Atempt interception
+	      char status = i->intercept(&(*j), shipstats);
+
+	      //Greater than 0: Draw line
+	      if (status <= 0) continue;
+	      SDL_Color red = {255, 0, 0};
+	      SDL_Color orange = {255, 255, 0};
+	      linedraw.line(i->pos(), j->pos(), orange, red);
+
+	      //Equal to 2: Dealt damage, but didn't notify
+	      if (status == 2)
+		{
+		  //Notify the AI before we go around deleting things
+		  for (std::list<GalconAI>::iterator k = ai.begin(); k != ai.end(); k++)
+		    {
+		      if (k->player() == j->owner())
+			{
+			  k->notifyFleetDamage(std::min(double(shipstats[i->type()].interceptDamage),
+							double(j->totalDefense(shipstats))));
+			}
+		    }
+		}
+
+	      //Equal to 3: Destroy target
+	      if (status != 3) break;
+
+	      //We can have the projectile code handle the cleanup later
+	      //Create a fake projectile right on top of it to deal the final blow
+	      std::stringstream convertnum;
+	      convertnum << "damage ";
+	      convertnum << shipstats[i->type()].interceptDamage*i->ships()*2;
+	      projectiles.push_back(Projectile(j->pos(), &(*j),
+					       convertnum.str(),
+					       shipstats[j->type()].speed*2));
+
+	      //Don't attack more than one ship
+	      break;
 	    }
 	  
 	  (*i).display(screen, camera);

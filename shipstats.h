@@ -18,6 +18,11 @@ struct ShipStats
 
   //The base speed of this ship type in pixels per second
   int speed;
+
+  //The interception stats of this ship type
+  int interceptRange;
+  float interceptDamage;
+  int interceptCD;
 };
 
 #endif

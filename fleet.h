@@ -20,6 +20,7 @@
 #include "shipstats.h"
 
 const int DEFAULT_FLEET_SPEED = 60;
+const int DEFAULT_INTERCEPT_CD = 500;
 
 class Fleet
 {
@@ -32,6 +33,7 @@ class Fleet
   Vec2f pos() const {return pos_;}
   double x() const {return pos_.x();}
   double y() const {return pos_.y();}
+  Vec2f vel() const;
   int ships() const {return ships_;}
   int type() const {return type_;}
   Planet* dest() const {return dest_;}
@@ -43,6 +45,7 @@ class Fleet
   void update();
   void display(SDL_Surface* screen, const SDL_Rect& camera);
   bool takeHit(int damage, const std::vector<ShipStats> & shipstats);
+  char intercept(Fleet* target, const std::vector<ShipStats> & shipstats);
   
  private:
   //Current coordinates of the fleet
@@ -62,6 +65,9 @@ class Fleet
 
   //The ticks at the last time update was called
   int lastTicks_;
+
+  //The ticks at the last time an interception shot was fired
+  int lastIntercept_;
 
   //The owner of the fleet
   int owner_;
