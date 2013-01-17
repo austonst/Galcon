@@ -259,7 +259,7 @@ void Planet::update()
 	  if (tokens.size() != 3) continue;
 
 	  //Add to the ship count
-	  ship_[std::atoi(tokens[1].c_str())].first += (float)dt/float(atoi(tokens[2].c_str()))/1000.0;
+	  ship_[std::atoi(tokens[1].c_str())].first += (float)dt/(atof(tokens[2].c_str()))/1000.0;
 	}
     }
 }
