@@ -517,7 +517,7 @@ commandList GalconAI::build(const std::vector<std::list<Building*> > buildRules,
 	  planetBuildRate *= (*i)->size();
 
 	  //Compare it to the current best and the upper limit
-	  if ((planetBuildRate > largestRate || largestPlanet == NULL) && planetBuildRate + currentBuildRate < maxBuildCost)
+	  if ((planetBuildRate > largestRate || largestPlanet == NULL) && planetBuildRate + currentBuildRate <= maxBuildCost)
 	    {
 	      std::cout << "  Planet " << (*i) << " has rate " << planetBuildRate << std::endl;
 	      largestPlanet = (*i);

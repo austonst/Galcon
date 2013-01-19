@@ -290,9 +290,9 @@ int main(int argc, char* argv[])
   aiSet.attackExtraEnemy = .7;
   aiSet.perPlanetAttackStrength = .5;
   aiSet.delay = 200;
-  aiSet.maximumBuildingFraction = .3;
+  aiSet.maximumBuildingFraction = .8;
   aiSet.minimumDefenseForBuilding = 10;
-  aiSet.distancePower = 1.2;
+  aiSet.distancePower = 1.15;
   ai.push_back(GalconAI(2, aiSet));
   ai.begin()->init(planets, shipstats);
   ai.begin()->activate();
