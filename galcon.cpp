@@ -22,11 +22,11 @@
 #include <ctime>
 #include <cstdlib>
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
-const int LEVEL_WIDTH = 800;
-const int LEVEL_HEIGHT = 600;
-const int CAMERA_SPEED = 200;
+const int SCREEN_WIDTH = 1000;
+const int SCREEN_HEIGHT = 750;
+const int LEVEL_WIDTH = 1000;
+const int LEVEL_HEIGHT = 750;
+const int CAMERA_SPEED = 400;
 const int FPS_CAP = 60;
 
 SDL_Surface* loadImage(std::string filename)
@@ -220,10 +220,10 @@ int main(int argc, char* argv[])
   //or we go too many tries without finding a spot for a new planet.
   char tries = 0;
   char maxTries = 10;
-  double density = 0.15;
+  double density = 0.13;
   double totalSize = LEVEL_WIDTH*LEVEL_HEIGHT;
   double currentSize = M_PI*UNSCALED_PLANET_RADIUS*UNSCALED_PLANET_RADIUS*2;
-  double spacing = 20;
+  double spacing = 23;
   
   while (currentSize/totalSize < density && tries < maxTries)
     {
