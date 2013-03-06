@@ -42,7 +42,7 @@ RotationCache::RotationCache(SDL_Surface* surf, int insize)
   rotation_[0] = SDL_CreateRGBSurface(SDL_SWSURFACE, surf->w, surf->h, surf->format->BitsPerPixel, 0, 0, 0, 0);
 
   SDL_Rect outrect = {0, 0, Uint16(surf->w), Uint16(surf->h)};
-  SDL_FillRect(rotation_[0], &outrect, 0xA09600);
+  SDL_FillRect(rotation_[0], &outrect, ROTATION_BACKGROUND_COLOR);
   SDL_BlitSurface(surf, NULL, rotation_[0], NULL);
 
   //Set size and set interval
@@ -235,6 +235,8 @@ void RotationCache::resize(int insize, SDL_Surface* surf)
   else
     {
       rotation_[0] = SDL_CreateRGBSurface(SDL_SWSURFACE, surf->w, surf->h, surf->format->BitsPerPixel, 0, 0, 0, 0);
+      SDL_Rect outrect = {0, 0, Uint16(surf->w), Uint16(surf->h)};
+      SDL_FillRect(rotation_[0], &outrect, ROTATION_BACKGROUND_COLOR);
       SDL_BlitSurface(surf, NULL, rotation_[0], NULL);
       SDL_SetColorKey(rotation_[0], SDL_SRCCOLORKEY, SDL_MapRGB( rotation_[0]->format, 160, 150, 0 ) );
     }

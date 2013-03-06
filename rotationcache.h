@@ -15,6 +15,8 @@
 
 const float rotatePi = 3.14159265358979323;
 
+const unsigned int ROTATION_BACKGROUND_COLOR = 0xA09600;
+
 class RotationCache
 {
  public:
