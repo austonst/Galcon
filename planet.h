@@ -28,9 +28,10 @@ const float PLANET1_FUEL_PER_SIZE = 500000;
 class Planet
 {
  public:
-  //Constructors
+  //Constructors/Destructor
   Planet();
   Planet(SDL_Surface* surf, float size, Vec2f loc, int type);
+  ~Planet();
 
   //Regular use functions
   void display(SDL_Surface* screen, TTF_Font* font, const SDL_Rect& camera);

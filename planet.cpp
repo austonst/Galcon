@@ -36,24 +36,29 @@ Planet::Planet()
   countImg_ = NULL;
   count_ = 0;
   owner_ = 0;
+  indicator_ = NULL;
   typeInfo_ = 0;
 }
 
 //Regular constructor
 Planet::Planet(SDL_Surface* surf, float size, Vec2f loc, int type):
-	    rotation_(scaleNN(surf, size), NUM_PLANET_ROTATIONS),
-	    rot_(0),
-	    rotspeed_(0),
-	    pos_(loc),
-	    size_(size),
-	    time_(0),
-	    type_(type),
-	    buildIndex_(-1),
-	    buildTime_(0),
-	    countImg_(NULL),
-	    count_(0),
-	    owner_(0)
+  rot_(0),
+  rotspeed_(0),
+  pos_(loc),
+  size_(size),
+  time_(0),
+  type_(type),
+  buildIndex_(-1),
+  buildTime_(0),
+  countImg_(NULL),
+  count_(0),
+  owner_(0),
+  indicator_(NULL)
 {
+  //Set rotation
+  SDL_Surface* scaled = scaleNN(surf, size);
+  rotation_ = RotationCache(scaled, NUM_PLANET_ROTATIONS);
+  SDL_FreeSurface(scaled);
   //Figure out how many buildings this planet can hold
   float buildcount = (2 * 3.14159265358979323) / (std::asin((BUILDING_WIDTH >> 1) / (UNSCALED_PLANET_RADIUS * size_)) * 2);
   building_.resize((int)buildcount, NULL);
@@ -64,6 +69,12 @@ Planet::Planet(SDL_Surface* surf, float size, Vec2f loc, int type):
     {
       typeInfo_ = PLANET1_FUEL_PER_SIZE * size_;
     }
+}
+
+//Destructor
+Planet::~Planet()
+{
+  if (indicator_ != NULL) SDL_FreeSurface(indicator_);
 }
 
 //Returns the total attack power of the planet
@@ -524,14 +535,26 @@ Vec2f Planet::buildcoords(int i)
 
 void Planet::setImage(SDL_Surface* insurf)
 {
-  rotation_ = RotationCache(scaleNN(insurf, size_), NUM_PLANET_ROTATIONS);
+  SDL_Surface* scaled = scaleNN(insurf, size_);
+  rotation_ = RotationCache(scaled, NUM_PLANET_ROTATIONS);
+  SDL_FreeSurface(scaled);
 }
 
 //Sets the owner and adjusts the indicator
 void Planet::setOwner(const int inowner, SDL_Surface* indicator[])
 {
   owner_ = inowner;
-  if (owner_ != 0) indicator_ = scaleNN(indicator[owner_], size_);
+
+  if (indicator_ != NULL) SDL_FreeSurface(indicator_);
+  
+  if (owner_ != 0)
+    {
+      indicator_ = scaleNN(indicator[owner_], size_);
+    }
+  else
+    {
+      indicator_ = NULL;
+    }
 }
 
 #endif
