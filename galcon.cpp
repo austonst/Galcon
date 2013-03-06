@@ -379,33 +379,36 @@ int main(int argc, char* argv[])
 		  break;
 		case SDLK_q:
 		  if (selectPlanet != planNull)
-		    {
-		      if (selectPlanet->owner() == localPlayer)
-			{
-			  selectPlanet->build(&(*(buildings.begin())), buildRules);
-			}
-		    }
+                    {
+                      if (selectPlanet->owner() != localPlayer ||
+                          buildRules[selectPlanet->type()].size() < 1) break;
+                      
+                      selectPlanet->build(*(buildRules[selectPlanet->type()].begin()),
+                                          buildRules);
+                    }
 		  break;
 		case SDLK_w:
 		  if (selectPlanet != planNull)
-		    {
-		      if (selectPlanet->owner() == localPlayer)
-			{
-			  selectPlanet->build(&(*(++buildings.begin())), buildRules);
-			}
-		    }
+                    {
+                      if (selectPlanet->owner() != localPlayer ||
+                          buildRules[selectPlanet->type()].size() < 2) break;
+                      
+                      selectPlanet->build(*(++buildRules[selectPlanet->type()].begin()),
+                                          buildRules);
+                    }
 		  break;
 		case SDLK_e:
 		  if (selectPlanet != planNull)
-		    {
-		      if (selectPlanet->owner() == localPlayer)
-			{
-			  std::list<Building>::iterator i = buildings.begin();
-			  i++; i++;
-			  selectPlanet->build(&(*i), buildRules);
-			}
-		    }
-		  break;
+                    {
+                      if (selectPlanet->owner() == localPlayer ||
+                          buildRules[selectPlanet->type()].size() < 3) break;
+                      
+                      std::list<Building*>::iterator i;
+                      i = buildRules[selectPlanet->type()].begin();
+                      i++; i++;
+                      selectPlanet->build(*i, buildRules);
+                    }
+                  break;
 		case SDLK_1:
 		  shipSendType = 0;
 		  break;
