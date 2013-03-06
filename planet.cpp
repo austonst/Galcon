@@ -25,7 +25,6 @@
 //Default constructor
 Planet::Planet()
 {
-  rotation_ = RotationCache();
   rot_ = 0;
   rotspeed_ = 0;
   pos_ = Vec2f(0,0);
@@ -37,6 +36,7 @@ Planet::Planet()
   countImg_ = NULL;
   count_ = 0;
   owner_ = 0;
+  typeInfo_ = 0;
 }
 
 //Regular constructor
@@ -58,6 +58,12 @@ Planet::Planet(SDL_Surface* surf, float size, Vec2f loc, int type):
   float buildcount = (2 * 3.14159265358979323) / (std::asin((BUILDING_WIDTH >> 1) / (UNSCALED_PLANET_RADIUS * size_)) * 2);
   building_.resize((int)buildcount, NULL);
   ship_.resize(10);
+
+  //Initialize typeInfo_ if needed
+  if (type_ == 1) //Lava
+    {
+      typeInfo_ = PLANET1_FUEL_PER_SIZE * size_;
+    }
 }
 
 //Returns the total attack power of the planet
@@ -231,6 +237,12 @@ void Planet::update()
 	}
     }
 
+  //Reduce fuel on volcanic planets
+  if (type_ == 1)
+    {
+      typeInfo_ -= dt;
+    }
+
   //Cycle through buildings
   for (unsigned int i = 0; i < building_.size(); i++)
     {
@@ -368,7 +380,9 @@ void Planet::takeAttack(int inships, int type, int player, const std::vector<Shi
 	    });
   
   //Resolve conflict
-  int acount = inships * shipstats[type].attack;
+  float amult = 1;
+  if (type_ == 1) amult = 1.3;
+  int acount = inships * shipstats[type].attack * amult;
   int dcount = defense[0].first * defense[0].second.first;
   unsigned int d = 0;
   while (d < ship_.size())
@@ -392,7 +406,7 @@ void Planet::takeAttack(int inships, int type, int player, const std::vector<Shi
 	  dcount = 0;
 
 	  //Adjust ship counts
-	  inships = acount/shipstats[type].attack;
+	  inships = acount/(shipstats[type].attack*amult);
 	  defense[d].second.first = 0;
 
 	  //Move to next defender
@@ -508,11 +522,16 @@ Vec2f Planet::buildcoords(int i)
 	       (std::sin(angle) * rad) + pos_.y() + (rotation_.rotation(0)->h/2));
 }
 
+void Planet::setImage(SDL_Surface* insurf)
+{
+  rotation_ = RotationCache(scaleNN(insurf, size_), NUM_PLANET_ROTATIONS);
+}
+
 //Sets the owner and adjusts the indicator
 void Planet::setOwner(const int inowner, SDL_Surface* indicator[])
 {
   owner_ = inowner;
-  if (owner_ != 0) indicator_ = scaleNN(indicator[owner_], size_); //Magic number
+  if (owner_ != 0) indicator_ = scaleNN(indicator[owner_], size_);
 }
 
 #endif

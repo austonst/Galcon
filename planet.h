@@ -23,6 +23,8 @@
 const int NUM_PLANET_ROTATIONS = 500;
 const int UNSCALED_PLANET_RADIUS = 50;
 
+const float PLANET1_FUEL_PER_SIZE = 500000;
+
 class Planet
 {
  public:
@@ -62,7 +64,7 @@ class Planet
   float totalDefense(const std::vector<ShipStats>& shipstats) const;
 
   //Mutators
-  void setImage(SDL_Surface* insurf) {rotation_ = RotationCache(insurf, NUM_PLANET_ROTATIONS);}
+  void setImage(SDL_Surface* insurf);
   void setRotSpeed(const float& inspeed) {rotspeed_ = inspeed;}
   void setSize(const float& insize) {size_ = insize;}
   void setType(const int& intype) {type_ = intype;}
@@ -115,6 +117,9 @@ class Planet
 
   //The surface for the scaled owner indicator
   SDL_Surface* indicator_;
+
+  //Variable for keeping track of type-specific information
+  int typeInfo_;
 };
   
 typedef std::list<Planet>::iterator planetIter;

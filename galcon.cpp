@@ -130,6 +130,11 @@ int main(int argc, char* argv[])
   shipstats[1].defense = 2;
   shipstats[1].speed = DEFAULT_FLEET_SPEED/2;
 
+  //Set up ship type 2: Fiery attack ship
+  shipstats[2].attack = 3;
+  shipstats[2].defense = 1;
+  shipstats[2].speed = DEFAULT_FLEET_SPEED*1.5;
+
   //Set up buildings and building rules
   std::list<Building> buildings;
   std::vector<std::list<Building*> > buildRules;
@@ -138,19 +143,33 @@ int main(int argc, char* argv[])
   SDL_Surface* bc01 = loadImage("bc01.png");
   SDL_Surface* b02 = loadImage("b02.png");
   SDL_Surface* bc02 = loadImage("bc02.png");
-  buildings.push_back(Building(b01, bc01, "build 0 2"));
-  buildings.push_back(Building(b02, bc02, "fire damage 2 1"));
-  buildings.push_back(Building(b01, bc01, "build 1 4"));
+  buildings.push_back(Building(b01, bc01, "build 0 2")); //0
+  buildings.push_back(Building(b02, bc02, "fire damage 2 1")); //1
+  buildings.push_back(Building(b01, bc01, "build 1 4")); //2
+  buildings.push_back(Building(b01, bc01, "build 2 2")); //3
+
+  //0
   std::list<Building>::iterator bi = buildings.begin();
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(15000);
   bi++;
+
+  //1
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(10000);
   bi->setRange(250);
   bi++;
+
+  //2
   buildRules[0].push_back(&(*bi));
   bi->setBuildTime(15000);
+  bi++;
+
+  //3
+  buildRules[1].push_back(&(*bi));
+  bi->setBuildTime(15000);
+
+  //Building images are now in rotation caches
   SDL_FreeSurface(b01);
   SDL_FreeSurface(bc01);
   SDL_FreeSurface(b02);
@@ -167,48 +186,21 @@ int main(int argc, char* argv[])
   indicator[1] = loadImage("selectorb.png");
   indicator[2] = loadImage("selectorr.png");
   
-  //Add a few planets
   //The following block comments provide a specific setting for testing purposes
-  SDL_Surface* planetimg = loadImage("planet.png");
-  /*
-  planets.push_back(Planet(planetimg, 1.2, Vec2f(200, 200), 1));
-  planets.push_back(Planet(planetimg, 0.6, Vec2f(750, 550), 0));
-  planets.push_back(Planet(planetimg, 1.0, Vec2f(1000, 900), 0));
-  SDL_FreeSurface(planetimg);
-
-  //Give them some attributes
-  planetIter pi = planets.begin();
-  (*pi).setRotSpeed(.0314159265358979323);
-  (*pi).build(&(*bi), buildRules);
-  (*pi).setOwner(2, indicator);
-  (*pi).setShipRate(0, ship0rate);
-  bi--;
-  pi++;
-  (*pi).setRotSpeed(.314159265358979323);
-  //(*pi).build(&(*bi), buildRules);
-  //(*pi).build(&(*bi), buildRules);
-  bi++;
-  //(*pi).build(&(*bi), buildRules);
-  (*pi).setOwner(1, indicator);
-  (*pi).setShipRate(0, ship0rate);
-  pi++;
-  (*pi).setRotSpeed(.0628);
-  (*pi).setOwner(0, indicator);
-  (*pi).setShipRate(0, ship0rate);
-  (*pi).setDifficulty(30);
-  */
+  SDL_Surface* planet0img = loadImage("planet0.png");
+  SDL_Surface* planet1img = loadImage("planet1.png");
 
   //Create the planets at random
   //First, create two home planets
   std::vector<int> homestart;
   homestart.resize(1,3);
-  planets.push_back(Planet(planetimg, 1.0,
+  planets.push_back(Planet(planet0img, 1.0,
 			   Vec2f(rand()%100, 100 + rand()%(LEVEL_HEIGHT-200)), 0));
   planets.back().setOwner(1, indicator);
   planets.back().setShipRate(0, ship0rate);
   planets.back().setRotSpeed(M_PI/20);
   planets.back().addShips(3, 0);
-  planets.push_back(Planet(planetimg, 1.0,
+  planets.push_back(Planet(planet0img, 1.0,
 			   Vec2f(LEVEL_WIDTH-(2*UNSCALED_PLANET_RADIUS)-(rand()%100),
 				 100 + rand()%(LEVEL_HEIGHT-200)), 0));
   planets.back().setOwner(2, indicator);
@@ -228,10 +220,21 @@ int main(int argc, char* argv[])
   while (currentSize/totalSize < density && tries < maxTries)
     {
       //Create a new planet at a completely random location with a random size
+      //For now, make half normal and half volcanic
       float psize = (double(rand())/double(RAND_MAX))*0.7 + 0.5;
-      Planet p(planetimg, psize,
-	       Vec2f(rand()%(LEVEL_WIDTH-int(2*UNSCALED_PLANET_RADIUS*psize)),
-		     rand()%(LEVEL_HEIGHT-int(2*UNSCALED_PLANET_RADIUS*psize))), 0);
+      Planet p(planet0img, psize,
+               Vec2f(rand()%(LEVEL_WIDTH-int(2*UNSCALED_PLANET_RADIUS*psize)),
+                     rand()%(LEVEL_HEIGHT-int(2*UNSCALED_PLANET_RADIUS*psize))), 0);;
+      if (rand()%2 == 0)
+        {
+          p.setType(0);
+          p.setImage(planet0img);
+        }
+      else
+        {
+          p.setType(1);
+          p.setImage(planet1img);
+        }
 
       //Make sure it doesn't collide with any other planets
       bool skip = false;
@@ -905,6 +908,8 @@ int main(int argc, char* argv[])
   //Free surfaces
   SDL_FreeSurface(indicator[1]);
   SDL_FreeSurface(indicator[2]);
+  SDL_FreeSurface(planet0img);
+  SDL_FreeSurface(planet1img);
 
   //Clean up TTF
   TTF_CloseFont(planetFont);
