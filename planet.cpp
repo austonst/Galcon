@@ -467,7 +467,7 @@ void Planet::takeAttack(int inships, int type, int player, const std::vector<Shi
     }
   else if (dcount == 0) //Attacker wins
     {
-      ship_[type].first = inships/amult;
+      ship_[type].first = inships/(amult*shipstats[type].attack);
       
       //Attacker now owns the planet
       setOwner(player, indicator);

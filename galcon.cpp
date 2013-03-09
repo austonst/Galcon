@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
   shipstats[1].speed = DEFAULT_FLEET_SPEED/2;
 
   //Set up ship type 2: Fiery attack ship
-  shipstats[2].attack = 3;
+  shipstats[2].attack = 2;
   shipstats[2].defense = 1;
   shipstats[2].speed = DEFAULT_FLEET_SPEED*1.5;
 
