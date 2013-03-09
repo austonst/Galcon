@@ -88,7 +88,7 @@ float Planet::totalAttack(const std::vector<ShipStats> & shipstats) const
   return att;
 }
 
-//Returns the total defense of the planet
+//Returns the total defense of the planet, taking damage multiplier into account
 float Planet::totalDefense(const std::vector<ShipStats> & shipstats) const
 {
   float def = 0;
@@ -96,7 +96,7 @@ float Planet::totalDefense(const std::vector<ShipStats> & shipstats) const
     {
       def += float(ship_[i].first) * shipstats[i].defense;
     }
-  return def;
+  return def * PLANET_DAMAGE_MULT[type_];
 }
 
 //Displays the current rotation of the planet to the screen along with each building
@@ -391,8 +391,7 @@ void Planet::takeAttack(int inships, int type, int player, const std::vector<Shi
 	    });
   
   //Resolve conflict
-  float amult = 1;
-  if (type_ == 1) amult = 1.3;
+  float amult = PLANET_DAMAGE_MULT[type_];
   int acount = inships * shipstats[type].attack * amult;
   int dcount = defense[0].first * defense[0].second.first;
   unsigned int d = 0;
@@ -468,7 +467,7 @@ void Planet::takeAttack(int inships, int type, int player, const std::vector<Shi
     }
   else if (dcount == 0) //Attacker wins
     {
-      ship_[type].first = inships;
+      ship_[type].first = inships/amult;
       
       //Attacker now owns the planet
       setOwner(player, indicator);

@@ -25,6 +25,8 @@ const int UNSCALED_PLANET_RADIUS = 50;
 
 const float PLANET1_FUEL_PER_SIZE = 500000;
 
+const float PLANET_DAMAGE_MULT[2] = {1,1.3};
+
 class Planet
 {
  public:
@@ -93,7 +95,7 @@ class Planet
   int time_;
 
   //Type of planet
-  char type_;
+  unsigned char type_;
   
   //Vector of buildings on this planet
   std::vector<BuildingInstance> building_;

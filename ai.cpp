@@ -79,6 +79,7 @@ commandList GalconAI::rebalance(const std::list<Fleet> & fleets, const std::vect
   for (planetPtrIter i = planets_.begin(); i != planets_.end(); i++)
     {
       //Find this planet's overall defense
+      
       def[(*i)] = (*i)->totalDefense(shipstats);
 
       //Add or subtract incoming ships
