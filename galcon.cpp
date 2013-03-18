@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
   //Set up ship type 2: Fiery attack ship
   shipstats[2].attack = 2;
   shipstats[2].defense = 1;
-  shipstats[2].speed = DEFAULT_FLEET_SPEED*1.5;
+  shipstats[2].speed = DEFAULT_FLEET_SPEED*1.25;
 
   //Set up buildings and building rules
   std::list<Building> buildings;
@@ -147,6 +147,7 @@ int main(int argc, char* argv[])
   buildings.push_back(Building(b02, bc02, "fire damage 2 1")); //1
   buildings.push_back(Building(b01, bc01, "build 1 4")); //2
   buildings.push_back(Building(b01, bc01, "build 2 2")); //3
+  buildings.push_back(Building(b02, bc02, "aura damage 1 total")); //4
 
   //0
   std::list<Building>::iterator bi = buildings.begin();
@@ -168,6 +169,13 @@ int main(int argc, char* argv[])
   //3
   buildRules[1].push_back(&(*bi));
   bi->setBuildTime(15000);
+  bi++;
+
+  //4
+  buildRules[1].push_back(&(*bi));
+  bi->setBuildTime(10000);
+  bi->setRange(200);
+  bi->setCD(1000);
 
   //Building images are now in rotation caches
   SDL_FreeSurface(b01);
@@ -745,6 +753,49 @@ int main(int argc, char* argv[])
 			}
 		    }
 		}
+
+              //Aura: aura <effect> <effectvars>
+              if (tokens[0] == "aura")
+                {
+                  //Find number of ships in range
+                  int shipcount = 0;
+                  for (fleetIter k = fleets.begin(); k != fleets.end(); k++)
+		    {
+		      //Only check further if it's an enemy fleet
+		      if (k->owner() == i->owner()) continue;
+		      //Compute the distance between them
+		      double dist = (i->buildcoords(j)-k->pos()).length();
+                      if (dist <= b->range()) shipcount += k->ships();
+                    }
+
+                  //Deal damage with a fake projectile
+                  if (fire)
+                    {
+                      for (fleetIter k = fleets.begin(); k != fleets.end(); k++)
+                        {
+                          //Only check further if it's an enemy fleet
+                          if (k->owner() == i->owner()) continue;
+                          //Compute the distance between them
+                          double dist = (i->buildcoords(j)-k->pos()).length();
+                          if (dist > b->range()) continue;
+                          
+                          std::string projstr;
+                          if (tokens[tokens.size()-1] == "total")
+                            {
+                              //Only take the appropriate amount
+                              std::stringstream toa;
+                              toa << atof(tokens[tokens.size()-2].c_str())*float(k->ships())/float(shipcount);
+                              tokens[tokens.size()-1] = toa.str();
+                            }
+                          for (unsigned int word = 1; word < tokens.size()-1; word++)
+                            {
+                              projstr += tokens[word] + " ";
+                            }
+                          projectiles.push_back(Projectile(k->pos(), &(*k), projstr, 1));
+                        }
+                    }
+                }
+                      
 	    }
 
 	  (*i).display(screen, planetFont, camera);
