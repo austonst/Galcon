@@ -194,9 +194,9 @@ int main(int argc, char* argv[])
   indicator[1] = loadImage("selectorb.png");
   indicator[2] = loadImage("selectorr.png");
   
-  //The following block comments provide a specific setting for testing purposes
   SDL_Surface* planet0img = loadImage("planet0.png");
   SDL_Surface* planet1img = loadImage("planet1.png");
+  SDL_Surface* planet1_1img = loadImage("planet1-1.png");
 
   //Create the planets at random
   //First, create two home planets
@@ -686,6 +686,15 @@ int main(int argc, char* argv[])
 	      SDL_FillRect(screen, &temprect, SDL_MapRGB(screen->format, 100, 100, 100));
 	    }
 
+          //If this is a lava planet and it is depleted, replace the image
+          if (i->typeInfo() < 0 && i->type() == 1)
+            {
+              i->setImage(planet1_1img);
+              i->setTypeInfo(0);
+              i->setRotSpeed(0);
+              i->setShipRate(0, ship0rate * PLANET1_DEPLETION_PENALTY);
+            }
+
 	  //Iterate over all buildings to handle effects from buildings to other objects
 
 	  for (unsigned int j = 0; j < i->buildcount(); j++)
@@ -780,13 +789,21 @@ int main(int argc, char* argv[])
                           if (dist > b->range()) continue;
                           
                           std::string projstr;
+                          //Divide appropriately if needed
                           if (tokens[tokens.size()-1] == "total")
                             {
-                              //Only take the appropriate amount
                               std::stringstream toa;
                               toa << atof(tokens[tokens.size()-2].c_str())*float(k->ships())/float(shipcount);
                               tokens[tokens.size()-1] = toa.str();
                             }
+                          //Depleted volcanic planets don't do as much
+                          if (i->type() == 1 && i->typeInfo() <= 0)
+                            {
+                              std::stringstream toa;
+                              toa << atof(tokens[tokens.size()-2].c_str())*PLANET1_DEPLETION_PENALTY;
+                              tokens[tokens.size()-1] = toa.str();
+                            }
+                          //Create the projectile
                           for (unsigned int word = 1; word < tokens.size()-1; word++)
                             {
                               projstr += tokens[word] + " ";
@@ -964,6 +981,7 @@ int main(int argc, char* argv[])
   SDL_FreeSurface(indicator[2]);
   SDL_FreeSurface(planet0img);
   SDL_FreeSurface(planet1img);
+  SDL_FreeSurface(planet1_1img);
 
   //Clean up TTF
   TTF_CloseFont(planetFont);

@@ -249,9 +249,12 @@ void Planet::update()
     }
 
   //Reduce fuel on volcanic planets
-  if (type_ == 1)
+  if (type_ == 1 && typeInfo_ > 0)
     {
       typeInfo_ -= dt;
+
+      //The main loop check for depletion depends on decreasing into the negatives
+      if (typeInfo_ == 0) typeInfo_--;
     }
 
   //Cycle through buildings
@@ -282,7 +285,17 @@ void Planet::update()
 	  if (tokens.size() != 3) continue;
 
 	  //Add to the ship count
-	  ship_[std::atoi(tokens[1].c_str())].first += (float)dt/(atof(tokens[2].c_str()))/1000.0;
+          //Depleted volcanic planets produce at lower speed
+          if (type_ == 1 && typeInfo_ <= 0)
+            {
+              float add = (float)dt/(atof(tokens[2].c_str()))/1000.0;
+              add *= PLANET1_DEPLETION_PENALTY;
+              ship_[std::atoi(tokens[1].c_str())].first += add;
+            }
+          else
+            {
+              ship_[std::atoi(tokens[1].c_str())].first += (float)dt/(atof(tokens[2].c_str()))/1000.0;
+            }
 	}
     }
 }
@@ -537,6 +550,18 @@ void Planet::setImage(SDL_Surface* insurf)
   SDL_Surface* scaled = scaleNN(insurf, size_);
   rotation_ = RotationCache(scaled, NUM_PLANET_ROTATIONS);
   SDL_FreeSurface(scaled);
+}
+
+//Sets the type and initializes typeInfo_
+void Planet::setType(const int& intype)
+{
+  type_ = intype;
+  
+  //Initialize typeInfo_ if needed
+  if (type_ == 1) //Lava
+    {
+      typeInfo_ = PLANET1_FUEL_PER_SIZE * size_;
+    }
 }
 
 //Sets the owner and adjusts the indicator

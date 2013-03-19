@@ -23,7 +23,8 @@
 const int NUM_PLANET_ROTATIONS = 500;
 const int UNSCALED_PLANET_RADIUS = 50;
 
-const float PLANET1_FUEL_PER_SIZE = 500000;
+const float PLANET1_FUEL_PER_SIZE = 240000;
+const float PLANET1_DEPLETION_PENALTY = .5;
 
 const float PLANET_DAMAGE_MULT[2] = {1,1.3};
 
@@ -65,15 +66,17 @@ class Planet
   int buildIndex() const {return buildIndex_;}
   float totalAttack(const std::vector<ShipStats>& shipstats) const;
   float totalDefense(const std::vector<ShipStats>& shipstats) const;
+  int typeInfo() const {return typeInfo_;}
 
   //Mutators
   void setImage(SDL_Surface* insurf);
   void setRotSpeed(const float& inspeed) {rotspeed_ = inspeed;}
   void setSize(const float& insize) {size_ = insize;}
-  void setType(const int& intype) {type_ = intype;}
+  void setType(const int& intype);
   void setOwner(const int inowner, SDL_Surface* indicator[]);
   void setShipRate(int index, float rate) {ship_[index].second = rate * size_;}
   void setDifficulty(int diff) {if (owner_==0) ship_[0].first = diff;}
+  void setTypeInfo(int ti) {typeInfo_ = ti;}
 
  private:
   //Stores the rotations of the planet
