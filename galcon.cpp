@@ -780,6 +780,7 @@ int main(int argc, char* argv[])
                   //Deal damage with a fake projectile
                   if (fire)
                     {
+                      bool hit = false;
                       for (fleetIter k = fleets.begin(); k != fleets.end(); k++)
                         {
                           //Only check further if it's an enemy fleet
@@ -787,6 +788,7 @@ int main(int argc, char* argv[])
                           //Compute the distance between them
                           double dist = (i->buildcoords(j)-k->pos()).length();
                           if (dist > b->range()) continue;
+                          hit = true;
                           
                           std::string projstr;
                           //Divide appropriately if needed
@@ -810,10 +812,18 @@ int main(int argc, char* argv[])
                             }
                           projectiles.push_back(Projectile(k->pos(), &(*k), projstr, 1));
                         }
+
+                      //Volcanic planets will lost some fuel
+                      if (i->type() == 1 && hit && i->typeInfo() != 0)
+                        {
+                          i->setTypeInfo(i->typeInfo()-PLANET1_DEPLETION_RATE);
+                          if (i->typeInfo() == 0) i->setTypeInfo(-1);
+                        }
+                      
                     }
                 }
                       
-	    }
+	    } //for each building
 
 	  (*i).display(screen, planetFont, camera);
 	}

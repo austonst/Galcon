@@ -286,11 +286,20 @@ void Planet::update()
 
 	  //Add to the ship count
           //Depleted volcanic planets produce at lower speed
-          if (type_ == 1 && typeInfo_ <= 0)
+          //and non-depleted should consume resources
+          if (type_ == 1)
             {
-              float add = (float)dt/(atof(tokens[2].c_str()))/1000.0;
-              add *= PLANET1_DEPLETION_PENALTY;
-              ship_[std::atoi(tokens[1].c_str())].first += add;
+              if (typeInfo_ <= 0)
+                {
+                  float add = (float)dt/(atof(tokens[2].c_str()))/1000.0;
+                  add *= PLANET1_DEPLETION_PENALTY;
+                  ship_[std::atoi(tokens[1].c_str())].first += add;
+                }
+              else
+                {
+                  typeInfo_ -= float(PLANET1_DEPLETION_RATE)*float(dt)/1000.0;
+                  if (typeInfo_ == 0) typeInfo_ = -1;
+                }
             }
           else
             {
