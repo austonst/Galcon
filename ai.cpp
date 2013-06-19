@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Galcon AI Class Implementation-----
   Auston Sterling
   austonst@gmail.com
-  7/24/12
 
   A class to handle AI controlled players in "Galcon"
 */

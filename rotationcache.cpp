@@ -1,8 +1,10 @@
 /*
-  Image Rotation Cache Class Implementation
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
+  -----Image Rotation Cache Class Implementation-----
   Auston Sterling
   austonst@gmail.com
-  12/8/11
 
   Contains the implementation of the RotationCache class.
   This is the non-threaded version, fully compatible with C++03.

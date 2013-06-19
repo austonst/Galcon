@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----LineDrawer Class Declaration-----
   Auston Sterling
   austonst@gmail.com
-  10/24/12
 
   Contains the declaration of the LineDrawer class, which draws (currently) Bresenham
   lines on an assigned SDL_Surface*.

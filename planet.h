@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Planet Class Declaration-----
   Auston Sterling
   austonst@gmail.com
-  11/4/12
 
   Header for the Planet class in "Galcon".
 */

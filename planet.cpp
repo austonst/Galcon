@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Planet Class Implementation-----
   Auston Sterling
   austonst@gmail.com
-  12/25/11
 
   Body for the Planet class in "Galcon".
 */

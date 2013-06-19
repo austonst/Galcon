@@ -1,7 +1,9 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Projectile Class Declaration-----
   Auston Sterling
-  4/4/12
   austonst@gmail.com
 
   Contains the header for the Projectile class.

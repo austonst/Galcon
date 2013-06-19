@@ -1,7 +1,9 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Building Class Declaration-----
   Auston Sterling
-  12/21/11
   austonst@gmail.com
 
   Contains the declaration for the Building class, for use in "Galcon"

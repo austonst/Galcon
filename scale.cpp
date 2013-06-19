@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Image Scaling Library Implementation-----
   Auston Sterling
   austonst@gmail.com
-  2/3/12
 
   A library containing a variety of algorithms for scaling images.
 */

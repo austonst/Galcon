@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----BuildingInstance Class Implementation-----
   Auston Sterling
   austonst@gmail.com
-  11/4/12
 
   Implementation of the BuildingInstance class.
 */

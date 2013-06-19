@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----BuildingInstance Class Header-----
   Auston Sterling
   austonst@gmail.com
-  4/11/12
 
   Header for the BuildingInstance class. This class is a particular instance of a
   building on a planet, allowing for tracking of building-specific variables

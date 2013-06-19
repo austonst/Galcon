@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Galcon Game Main Body-----
   Auston Serling
   austonst@gmail.com
-  7/24/12
 
   Contains the main body for the game "Galcon" (Unnamed so far).
 */

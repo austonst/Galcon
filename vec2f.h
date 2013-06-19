@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Vec2f Class-----
   Auston Sterling
   austonst@gmail.com
-  6/27/12
 
   A class for storing and performing operations on a 2D vector.
   Originally based off of Justin Legakis' vectors.h.

@@ -1,8 +1,10 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Extra Functions File-----
   Auston Sterling
   austonst@gmail.com
-  4/5/12
 
   Contains extra functions which don't have a better place to be.
 */

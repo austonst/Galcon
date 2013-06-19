@@ -1,4 +1,7 @@
 /*
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
   -----Shipstats Struct-----
   Auston Sterling
   austonst@gmail.com

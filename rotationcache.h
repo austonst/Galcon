@@ -1,8 +1,10 @@
 /*
-  Image Rotation Cache Class Declaration
+  Copyright (c) 2013 Auston Sterling
+  See license.txt for copying permission.
+  
+  -----Image Rotation Cache Class Declaration-----
   Auston Sterling
   austonst@gmail.com
-  12/8/11
 
   Works with rotateImage to store rotations of a given
   SDL_Surface, caching them in case the same rotation is called later.
