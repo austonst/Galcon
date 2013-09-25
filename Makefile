@@ -1,7 +1,6 @@
 # Copyright (c) 2013 Auston Sterling
 # See license.txt for copying permission.
-
-See the file license.txt for copying permission.
+# See the file license.txt for copying permission.
 
 CC=g++
 CFLAGS=-g -c -Wall -std=c++0x
