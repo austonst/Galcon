@@ -17,15 +17,15 @@
 #include <cmath>
 
 //Default constructor
-lineDrawer::lineDrawer() : surf_(NULL)
+LineDrawer::LineDrawer() : surf_(NULL)
 {}
 
 //Better constructor
-lineDrawer::lineDrawer(SDL_Surface* insurf) : surf_(insurf)
+LineDrawer::LineDrawer(SDL_Surface* insurf) : surf_(insurf)
 {}
 
 //Draws a line on the SDL_Surface from p1 to p2 with color c
-void lineDrawer::line(Vec2f p1, Vec2f p2, SDL_Color c)
+void LineDrawer::line(Vec2f p1, Vec2f p2, SDL_Color c)
 {
   //Find if the surface is longer in X or Y direction
   bool steep = abs(p2.y() - p1.y()) > abs(p2.x() - p1.x());
@@ -88,7 +88,7 @@ void lineDrawer::line(Vec2f p1, Vec2f p2, SDL_Color c)
 }
 
 //Draws a line on the SDL_Surface from p1 (with color c1) to p2 (with color c2)
-void lineDrawer::line(Vec2f p1, Vec2f p2, SDL_Color c1, SDL_Color c2)
+void LineDrawer::line(Vec2f p1, Vec2f p2, SDL_Color c1, SDL_Color c2)
 {
   //Find if the surface is longer in X or Y direction
   bool steep = abs(p2.y() - p1.y()) > abs(p2.x() - p1.x());

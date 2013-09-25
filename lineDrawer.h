@@ -16,12 +16,12 @@
 #include "vec2f.h"
 #include <SDL/SDL.h>
 
-class lineDrawer
+class LineDrawer
 {
  public:
   //Constructors
-  lineDrawer();
-  lineDrawer(SDL_Surface* insurf);
+  LineDrawer();
+  LineDrawer(SDL_Surface* insurf);
 
   //Mutators
   void setSurface(SDL_Surface* insurf) {surf_ = insurf;}

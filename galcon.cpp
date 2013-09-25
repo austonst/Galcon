@@ -317,7 +317,7 @@ int main(int argc, char* argv[])
   int shipSendType = 0;
 
   //A line drawer for the main surface
-  lineDrawer linedraw(screen);
+  LineDrawer linedraw(screen);
   
   /*
     -----
