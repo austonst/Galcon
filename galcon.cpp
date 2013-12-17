@@ -410,7 +410,7 @@ int main(int argc, char* argv[])
 		case SDLK_e:
 		  if (selectPlanet != planNull)
                     {
-                      if (selectPlanet->owner() == localPlayer ||
+                      if (selectPlanet->owner() != localPlayer ||
                           buildRules[selectPlanet->type()].size() < 3) break;
                       
                       std::list<Building*>::iterator i;
